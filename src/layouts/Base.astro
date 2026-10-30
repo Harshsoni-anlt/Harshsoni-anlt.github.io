@@ -1,0 +1,123 @@
+---
+import { profile } from '../data/profile'
+
+interface Props {
+  title: string
+  description: string
+  mode: 'adventure' | 'recruiter'
+}
+const { title, description, mode } = Astro.props
+const canonical = new URL(Astro.url.pathname, Astro.site)
+---
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="alternate" type="application/json" href="/profile.json" title="Profile (JSON)" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0f1620" media="(prefers-color-scheme: dark)" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,500..800,50&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body data-mode={mode}>
+  <a class="skip" href="#main">Skip to content</a>
+  <header class="top">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <span>{profile.name}</span>
+    </a>
+    <nav class="mode" aria-label="View">
+      <a href="/" aria-current={mode === 'adventure' ? 'page' : undefined}>Adventure</a>
+      <a href="/resume/" aria-current={mode === 'recruiter' ? 'page' : undefined}>Recruiter</a>
+    </nav>
+  </header>
+  <main id="main"><slot /></main>
+  <footer class="foot">
+    <span>{profile.name} · {profile.role} · {profile.location}</span>
+    <span class="foot-links">
+      <a href={profile.github}>GitHub</a>
+      {profile.linkedin && <a href={profile.linkedin}>LinkedIn</a>}
+      <a href="/profile.json">profile.json</a>
+      <a href="/llms.txt">llms.txt</a>
+    </span>
+  </footer>
+</body>
+</html>
+
+<style is:global>
+  :root {
+    --paper: #f4efe4; --paper-2: #ebe3d1; --card: #fbf8f1;
+    --ink: #1c2733; --ink-2: #4b5765; --line: #d3c8b1; --line-2: #e2d9c6;
+    --route: #c2410c; --cleared: #2c6a4b; --active: #8a5a00; --fog: #5f6974;
+    --focus: #1d4ed8;
+    --display: 'Fraunces', Georgia, serif;
+    --sans: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    color-scheme: light dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0f1620; --paper-2: #152131; --card: #162232;
+      --ink: #ebe5d8; --ink-2: #a9b3bf; --line: #2a3a4e; --line-2: #1f2d3e;
+      --route: #ff8a50; --cleared: #6cc79a; --active: #f0b84f; --fog: #8b96a3;
+      --focus: #8ab4ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--paper); color: var(--ink);
+    font: 16px/1.6 var(--sans); min-height: 100vh; display: flex; flex-direction: column;
+  }
+  main { flex: 1; width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 16px 64px; }
+  a { color: inherit; text-decoration-color: var(--route); text-underline-offset: 3px; }
+  a:hover { color: var(--route); }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+  h1, h2, h3 { font-family: var(--display); font-variation-settings: 'SOFT' 50; line-height: 1.15; letter-spacing: -0.01em; }
+  .mono { font-family: var(--mono); }
+  .eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--ink); color: var(--paper); padding: 8px 12px; border-radius: 6px; z-index: 10; }
+  .skip:focus { left: 8px; }
+
+  .top {
+    max-width: 1120px; margin: 0 auto; width: 100%; padding: 18px 16px;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand { display: inline-flex; align-items: center; gap: 10px; font: 600 17px/1 var(--display); text-decoration: none; }
+  .brand-mark { color: var(--route); font-size: 18px; }
+  .mode { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 999px; padding: 3px; gap: 2px; }
+  .mode a {
+    font: 500 13px/1 var(--mono); padding: 8px 14px; border-radius: 999px; text-decoration: none;
+    min-height: 32px; display: inline-flex; align-items: center;
+  }
+  .mode a[aria-current='page'] { background: var(--ink); color: var(--paper); }
+
+  .foot {
+    max-width: 1120px; margin: 0 auto; width: 100%; padding: 24px 16px 32px;
+    border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px;
+    justify-content: space-between; font: 13px/1.5 var(--mono); color: var(--ink-2);
+  }
+  .foot-links { display: inline-flex; gap: 16px; flex-wrap: wrap; }
+
+  .chip {
+    display: inline-block; font: 500 12px/1 var(--mono); padding: 6px 9px; border-radius: 6px;
+    background: var(--paper-2); color: var(--ink); border: 1px solid var(--line-2);
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px;
+    border-radius: 10px; border: 1.5px solid var(--ink); font: 600 15px/1 var(--sans); text-decoration: none;
+  }
+  .btn.primary { background: var(--ink); color: var(--paper); }
+  .btn.primary:hover { background: var(--route); border-color: var(--route); color: var(--paper); }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>

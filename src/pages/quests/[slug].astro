@@ -1,0 +1,86 @@
+---
+import { getCollection, render } from 'astro:content'
+import Base from '../../layouts/Base.astro'
+import { fmtDate, questCode, sortQuests } from '../../lib/achievements'
+import { repoStats } from '../../lib/github'
+
+export async function getStaticPaths() {
+  const quests = sortQuests(await getCollection('quests'))
+  return quests.map((q, i) => ({ params: { slug: q.id }, props: { q, prev: quests[i - 1], next: quests[i + 1] } }))
+}
+const { q, prev, next } = Astro.props
+const d = q.data
+const { Content } = await render(q)
+const stats = d.repo ? await repoStats(d.repo) : null
+const repoUrl = d.repo ? `https://github.com/${d.repo}` : undefined
+---
+<Base title={`${d.title} · ${questCode(q)}`} description={d.tagline} mode="adventure">
+  <nav class="crumb eyebrow" aria-label="Breadcrumb"><a href="/">Trail map</a> / {questCode(q)}</nav>
+  <header class="head">
+    <p class={`status ${d.status}`}>{d.status === 'cleared' ? `✓ Cleared ${fmtDate(d.shipped)}` : '● In progress'}</p>
+    <h1>{d.title}</h1>
+    <p class="lede">{d.tagline}</p>
+    <div class="links">
+      {repoUrl && <a class="btn primary" href={repoUrl}>Repository{stats?.stars ? ` · ★ ${stats.stars}` : ''}</a>}
+      {d.linkedin && <a class="btn" href={d.linkedin}>LinkedIn post</a>}
+      {d.demo && <a class="btn" href={d.demo}>Demo</a>}
+    </div>
+  </header>
+
+  <section class="block">
+    <h2><span class="eyebrow">The quest</span>What the business needed</h2>
+    <p class="quest">{d.quest}</p>
+  </section>
+
+  <section class="block">
+    <h2><span class="eyebrow">XP</span>What was measured</h2>
+    <ul class="xp">{d.xp.map(x => <li><b>{x.value}</b><span>{x.label}</span></li>)}</ul>
+  </section>
+
+  <section class="block prose">
+    <h2><span class="eyebrow">Loot</span>What was built</h2>
+    <Content />
+  </section>
+
+  {d.boss && (
+    <section class="block boss">
+      <h2><span class="eyebrow">Boss fight</span>{d.boss.name}</h2>
+      <p>{d.boss.story}</p>
+    </section>
+  )}
+
+  <section class="block">
+    <h2><span class="eyebrow">Gear</span>Stack</h2>
+    <p class="chips">{d.stack.map(s => <span class="chip">{s}</span>)}{d.cost && <span class="chip cost">cost: {d.cost}</span>}</p>
+    {stats && <p class="eyebrow">last commit {fmtDate(new Date(stats.pushedAt))}</p>}
+  </section>
+
+  <nav class="pager" aria-label="Other quests">
+    {prev ? <a href={`/quests/${prev.id}/`}>← {questCode(prev)} {prev.data.title}</a> : <span />}
+    {next ? <a href={`/quests/${next.id}/`}>{questCode(next)} {next.data.title} →</a> : <a href="/">Back to the map →</a>}
+  </nav>
+</Base>
+
+<style>
+  .crumb { padding-top: 16px; }
+  .crumb a { text-decoration: none; }
+  .head { padding: 20px 0 28px; border-bottom: 1.5px solid var(--ink); margin-bottom: 28px; max-width: 820px; }
+  .status { font: 600 13px/1 var(--mono); margin: 0; }
+  .status.cleared { color: var(--cleared); } .status.in-progress { color: var(--active); }
+  h1 { font-size: clamp(34px, 6vw, 56px); margin: 10px 0 12px; }
+  .lede { font-size: 19px; color: var(--ink-2); margin: 0 0 20px; }
+  .links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .block { max-width: 820px; margin-bottom: 36px; }
+  .block h2 { font-size: 26px; margin: 0 0 12px; display: flex; flex-direction: column; gap: 4px; }
+  .quest { font-size: 18px; margin: 0; }
+  .xp { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .xp li { padding: 16px; border-radius: 12px; background: var(--card); border: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; }
+  .xp b { font: 700 28px/1.1 var(--display); color: var(--cleared); }
+  .xp span { color: var(--ink-2); font-size: 14px; }
+  .prose :global(ul) { padding-left: 20px; } .prose :global(li) { margin-bottom: 6px; }
+  .boss { padding: 18px 20px; border-radius: 12px; border: 1.5px dashed var(--route); }
+  .boss p { margin: 0; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 10px; }
+  .cost { border-color: var(--cleared); }
+  .pager { max-width: 820px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-top: 20px; border-top: 1px solid var(--line); font: 14px var(--mono); }
+</style>

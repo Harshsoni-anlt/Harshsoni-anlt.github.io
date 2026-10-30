@@ -1,0 +1,128 @@
+---
+import type { CollectionEntry } from 'astro:content'
+import { fmtDate, questCode } from '../lib/achievements'
+
+interface Props { quests: CollectionEntry<'quests'>[] }
+const { quests } = Astro.props
+
+// Waypoints along a winding trail, left to right. One more than the quests: the fog of "next".
+// ponytail: fixed anchor list holds 9 quests; add anchors (or a second map sheet) past that.
+const ANCHORS: [number, number][] = [
+  [92, 410], [218, 262], [356, 372], [478, 218], [612, 330], [736, 178], [852, 300], [930, 150], [960, 360],
+]
+const stops = [...quests.map(q => ({ q })), { q: null }].slice(0, ANCHORS.length).map((s, i) => ({ ...s, at: ANCHORS[i]! }))
+
+// Smooth trail through the stops (Catmull-Rom → cubic Bézier).
+const pts = stops.map(s => s.at)
+let trail = `M ${pts[0]![0]} ${pts[0]![1]}`
+for (let i = 0; i < pts.length - 1; i++) {
+  const [p0, p1, p2, p3] = [pts[i - 1] ?? pts[i]!, pts[i]!, pts[i + 1]!, pts[i + 2] ?? pts[i + 1]!]
+  const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6]
+  const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6]
+  trail += ` C ${c1[0]} ${c1[1]}, ${c2[0]} ${c2[1]}, ${p2[0]} ${p2[1]}`
+}
+const cols = 'ABCDEFGHIJ'.split('')
+---
+<figure class="map">
+  <svg viewBox="0 0 1000 540" role="group" aria-labelledby="map-title">
+    <title id="map-title">Map of the journey so far: {quests.length} quests along one trail</title>
+    <defs>
+      <pattern id="grid" width="100" height="90" patternUnits="userSpaceOnUse">
+        <path d="M 100 0 L 0 0 0 90" fill="none" class="grid" />
+      </pattern>
+      <radialGradient id="fog">
+        <stop offset="0" class="fog-in" />
+        <stop offset="1" class="fog-out" />
+      </radialGradient>
+    </defs>
+
+    <rect x="0" y="0" width="1000" height="540" class="sea" />
+    <rect x="0" y="0" width="1000" height="540" fill="url(#grid)" />
+    <!-- contour lines: decoration only -->
+    <g class="contours" aria-hidden="true">
+      <path d="M -20 470 C 120 420, 210 500, 360 450 S 600 380, 760 430 S 960 400, 1020 440" />
+      <path d="M -20 500 C 160 460, 260 530, 420 490 S 640 430, 800 470 S 980 450, 1020 480" />
+      <path d="M 140 130 C 220 80, 330 110, 360 160 S 300 240, 220 220 S 90 180, 140 130 Z" />
+      <path d="M 170 145 C 230 115, 300 135, 318 165 S 280 210, 230 200 S 140 175, 170 145 Z" />
+      <path d="M 560 80 C 660 40, 780 70, 790 110 S 700 160, 620 140 S 500 110, 560 80 Z" />
+      <path d="M 600 92 C 660 70, 740 85, 748 108 S 690 135, 640 126 S 570 108, 600 92 Z" />
+      <path d="M 640 470 C 720 440, 840 450, 870 490 S 760 530, 690 520 S 600 495, 640 470 Z" />
+    </g>
+    <g class="ticks" aria-hidden="true">
+      {cols.map((c, i) => <text x={i * 100 + 50} y="22">{c}</text>)}
+      {[1, 2, 3, 4, 5, 6].map(n => <text x="14" y={n * 90 - 36}>{n}</text>)}
+    </g>
+
+    <path d={trail} class="trail-shadow" />
+    <path d={trail} class="trail" />
+
+    {stops.map(({ q, at: [x, y] }, i) =>
+      q ? (
+        <a href={`/quests/${q.id}/`} class={`stop ${q.data.status}`}>
+          <g transform={`translate(${x} ${y})`}>
+            <circle r="22" class="halo" />
+            <circle r="13" class="pin" />
+            {q.data.status === 'cleared'
+              ? <path d="M -5 0 L -1 4 L 6 -5" class="tick" />
+              : <circle r="4" class="dot" />}
+            <g transform={`translate(0 ${y > 300 ? 40 : -34})`}>
+              <text class="code" text-anchor="middle">{questCode(q)} · {q.data.status === 'cleared' ? fmtDate(q.data.shipped) : 'in progress'}</text>
+              <text class="name" text-anchor="middle" y="20">{q.data.title}</text>
+            </g>
+          </g>
+        </a>
+      ) : (
+        <g transform={`translate(${x} ${y})`} aria-hidden="true">
+          <circle r="64" fill="url(#fog)" />
+          <text class="fogq" text-anchor="middle" y="9">?</text>
+          <text class="code" text-anchor="middle" y="52">next quest</text>
+        </g>
+      ),
+    )}
+
+    <g class="compass" transform="translate(940 480)" aria-hidden="true">
+      <circle r="24" />
+      <path d="M 0 -20 L 5 0 L 0 20 L -5 0 Z" />
+      <text y="-28" text-anchor="middle">N</text>
+    </g>
+  </svg>
+  <figcaption class="eyebrow">Trail map · each pin is a shipped project · select one to open it</figcaption>
+</figure>
+
+<style>
+  .map { margin: 0; }
+  /* On a phone the map keeps a readable size and pans sideways inside its frame. */
+  @media (max-width: 640px) {
+    .map { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    svg { min-width: 680px; }
+  }
+  svg { width: 100%; height: auto; display: block; border: 1.5px solid var(--ink); border-radius: 14px; background: var(--card); }
+  figcaption { margin-top: 10px; }
+  .sea { fill: var(--card); }
+  .grid { stroke: var(--line-2); stroke-width: 1; }
+  .contours path { fill: none; stroke: var(--line); stroke-width: 1.2; }
+  .ticks text { font: 500 12px var(--mono); fill: var(--fog); }
+  .trail-shadow { fill: none; stroke: var(--paper-2); stroke-width: 12; stroke-linecap: round; }
+  .trail { fill: none; stroke: var(--route); stroke-width: 3; stroke-dasharray: 2 9; stroke-linecap: round; }
+  .halo { fill: var(--card); opacity: .9; }
+  .pin { fill: var(--card); stroke-width: 3; }
+  .cleared .pin { stroke: var(--cleared); fill: var(--cleared); }
+  .in-progress .pin { stroke: var(--active); }
+  .tick { fill: none; stroke: var(--card); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+  .dot { fill: var(--active); }
+  .in-progress .halo { stroke: var(--active); stroke-width: 1.5; stroke-dasharray: 3 4; animation: spin 14s linear infinite; transform-box: fill-box; transform-origin: center; }
+  .code { font: 500 12px var(--mono); fill: var(--ink-2); letter-spacing: .04em; }
+  .name { font: 650 18px var(--display); fill: var(--ink); }
+  .stop { cursor: pointer; }
+  .stop:hover .name, .stop:focus-visible .name { fill: var(--route); }
+  .stop:hover .pin { transform: scale(1.12); transition: transform .15s; }
+  .stop:focus-visible { outline: none; }
+  .stop:focus-visible .halo { stroke: var(--focus); stroke-width: 3; }
+  .fog-in { stop-color: var(--fog); stop-opacity: .28; }
+  .fog-out { stop-color: var(--fog); stop-opacity: 0; }
+  .fogq { font: 700 28px var(--display); fill: var(--fog); }
+  .compass circle { fill: none; stroke: var(--line); }
+  .compass path { fill: var(--route); }
+  .compass text { font: 500 11px var(--mono); fill: var(--fog); }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>

@@ -1,0 +1,103 @@
+---
+import { getCollection } from 'astro:content'
+import Base from '../layouts/Base.astro'
+import { profile } from '../data/profile'
+import { fmtDate, sortQuests } from '../lib/achievements'
+
+const quests = sortQuests(await getCollection('quests'))
+// Skills = everything actually used across the quests, most-used first.
+const counts = new Map<string, number>()
+for (const q of quests) for (const s of q.data.stack) counts.set(s, (counts.get(s) ?? 0) + 1)
+const skills = [...counts].sort((a, b) => b[1] - a[1]).map(([s]) => s)
+---
+<Base title={`${profile.name} · Résumé`} description={profile.summary} mode="recruiter">
+  <article class="cv">
+    <header>
+      <h1>{profile.name}</h1>
+      <p class="role">{profile.role} · {profile.location}</p>
+      <p class="contact mono">
+        <a href={profile.github}>{profile.github.replace('https://', '')}</a>
+        {profile.linkedin && <a href={profile.linkedin}>{profile.linkedin.replace('https://www.', '')}</a>}
+        {profile.email && <a href={`mailto:${profile.email}`}>{profile.email}</a>}
+      </p>
+      <button class="print btn" type="button" onclick="window.print()">Print / save as PDF</button>
+    </header>
+
+    <section>
+      <h2>Summary</h2>
+      <p>{profile.summary}</p>
+    </section>
+
+    <section>
+      <h2>Experience</h2>
+      {profile.experience.map(x => (
+        <div class="item">
+          <div class="item-head"><h3>{x.title} · {x.org}</h3><span class="mono">{x.when}</span></div>
+          <p>{x.what}</p>
+        </div>
+      ))}
+    </section>
+
+    <section>
+      <h2>Open-source projects</h2>
+      {quests.map(q => (
+        <div class="item">
+          <div class="item-head">
+            <h3>{q.data.title}</h3>
+            <span class="mono">{q.data.status === 'cleared' ? fmtDate(q.data.shipped) : 'in progress'}</span>
+          </div>
+          <p>{q.data.resumeLine}</p>
+          <p class="meta mono">
+            {q.data.stack.join(' · ')}
+            {q.data.repo && <> · <a href={`https://github.com/${q.data.repo}`}>github.com/{q.data.repo}</a></>}
+          </p>
+        </div>
+      ))}
+    </section>
+
+    <section>
+      <h2>Skills used in shipped work</h2>
+      <p>{skills.join(' · ')}</p>
+    </section>
+
+    <section>
+      <h2>Education</h2>
+      {profile.education.map(x => (
+        <div class="item-head"><h3>{x.title} · {x.org}</h3><span class="mono">{x.when}</span></div>
+      ))}
+    </section>
+
+    <section>
+      <h2>Awards &amp; certification</h2>
+      <ul>{profile.awards.map(a => <li>{a}</li>)}</ul>
+    </section>
+
+    <section>
+      <h2>How I work</h2>
+      <ul>{profile.discipline.map(d => <li><strong>{d.rule}</strong> {d.why}</li>)}</ul>
+    </section>
+  </article>
+</Base>
+
+<style>
+  .cv { max-width: 760px; margin: 24px auto 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 36px clamp(18px, 5vw, 48px); }
+  header { border-bottom: 1.5px solid var(--ink); padding-bottom: 18px; margin-bottom: 8px; position: relative; }
+  h1 { font-size: 40px; margin: 0; }
+  .role { margin: 6px 0 10px; font-size: 18px; color: var(--ink-2); }
+  .contact { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; margin: 0; }
+  .print { margin-top: 16px; background: none; color: var(--ink); cursor: pointer; }
+  h2 { font: 600 13px/1 var(--mono); text-transform: uppercase; letter-spacing: .12em; color: var(--ink-2); margin: 26px 0 10px; }
+  section p { margin: 0 0 6px; }
+  .item { margin-bottom: 16px; }
+  .item-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .item-head span { font-size: 13px; color: var(--ink-2); }
+  h3 { font-size: 20px; margin: 0 0 4px; }
+  .meta { font-size: 12.5px; color: var(--ink-2); }
+  ul { margin: 0; padding-left: 20px; } li { margin-bottom: 6px; }
+  @media print {
+    :global(.top), :global(.foot), :global(.skip), .print { display: none !important; }
+    :global(body) { background: #fff; color: #000; }
+    .cv { border: 0; padding: 0; margin: 0; max-width: none; background: #fff; }
+    a { color: #000; text-decoration: none; }
+  }
+</style>
