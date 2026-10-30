@@ -1,0 +1,56 @@
+---
+import { CHAPTERS } from '../data/profile'
+
+interface Props { chapter: keyof typeof CHAPTERS; title: string; when?: string; intro?: string }
+const { chapter, title, when, intro } = Astro.props
+const c = CHAPTERS[chapter]
+---
+<section id={chapter} class="chapter reveal" data-chapter={chapter} aria-labelledby={`${chapter}-h`}>
+  <div class="inner">
+    <div class="head">
+      <span class="numeral" aria-hidden="true">{c.n}</span>
+      <div>
+        <p class="eyebrow">Ch.{c.n} · {c.name} · {c.when}</p>
+        <h2 id={`${chapter}-h`}>{title}</h2>
+        {when && <p class="when">{when}</p>}
+        {intro && <p class="intro">{intro}</p>}
+      </div>
+    </div>
+    <slot />
+  </div>
+</section>
+
+<style>
+  .chapter {
+    background: color-mix(in oklch, var(--accent) var(--band), var(--bg));
+    position: relative; padding: 96px 0;
+  }
+  .chapter::before {
+    content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: var(--accent);
+    transform-origin: left;
+  }
+  .inner { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+  .head { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: end; margin-bottom: 48px; }
+  .numeral {
+    font: 800 clamp(5rem, 12vw, 10rem)/.8 var(--display); color: transparent;
+    -webkit-text-stroke: 1.5px var(--accent); letter-spacing: -0.04em;
+  }
+  h2 { font: 700 clamp(1.75rem, 3.5vw, 3rem)/1.1 var(--display); margin: 8px 0 0; letter-spacing: -0.02em; }
+  .eyebrow { color: var(--accent); }
+  .when { margin: 8px 0 0; color: var(--ink-2); font: .9375rem var(--mono); }
+  .intro { margin: 12px 0 0; color: var(--ink-2); max-width: 60ch; font-size: 1.0625rem; }
+  @media (max-width: 720px) {
+    .chapter { padding: 64px 0; }
+    .inner { padding: 0 16px; }
+    .head { grid-template-columns: 1fr; gap: 0; }
+    .numeral { font-size: 4.5rem; }
+  }
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .chapter::before { animation: draw linear both; animation-timeline: view(); animation-range: entry 0% entry 40%; }
+      .numeral { animation: drift linear both; animation-timeline: view(); animation-range: cover 0% cover 100%; }
+    }
+  }
+  @keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+  @keyframes drift { from { transform: translateY(24px); } to { transform: translateY(-24px); } }
+</style>

@@ -1,19 +1,16 @@
 ---
+import ContactHub from '../components/ContactHub.astro'
 import { profile } from '../data/profile'
 
-interface Props {
-  title: string
-  description: string
-  mode: 'adventure' | 'recruiter'
-}
-const { title, description, mode } = Astro.props
+interface Props { title: string; description: string; print?: boolean }
+const { title, description, print = false } = Astro.props
 const canonical = new URL(Astro.url.pathname, Astro.site)
 ---
 <!doctype html>
-<html lang="en">
+<html lang="en-IN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>{title}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonical} />
@@ -22,102 +19,136 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={canonical} />
-  <meta name="theme-color" content="#f4efe4" media="(prefers-color-scheme: light)" />
-  <meta name="theme-color" content="#0f1620" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#0B0D17" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#F7F6F2" media="(prefers-color-scheme: light)" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT@9..144,500..800,50&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Geist:wght@400;500;600&display=swap" rel="stylesheet" />
 </head>
-<body data-mode={mode}>
+<body class={print ? 'print' : undefined}>
   <a class="skip" href="#main">Skip to content</a>
-  <header class="top">
-    <a class="brand" href="/">
-      <span class="brand-mark" aria-hidden="true">✦</span>
-      <span>{profile.name}</span>
-    </a>
-    <nav class="mode" aria-label="View">
-      <a href="/" aria-current={mode === 'adventure' ? 'page' : undefined}>Adventure</a>
-      <a href="/resume/" aria-current={mode === 'recruiter' ? 'page' : undefined}>Recruiter</a>
-    </nav>
-  </header>
+  <div class="progress" aria-hidden="true"><i></i></div>
+  <ContactHub variant="bar" />
   <main id="main"><slot /></main>
   <footer class="foot">
-    <span>{profile.name} · {profile.role} · {profile.location}</span>
-    <span class="foot-links">
-      <a href={profile.github}>GitHub</a>
-      {profile.linkedin && <a href={profile.linkedin}>LinkedIn</a>}
-      <a href="/profile.json">profile.json</a>
-      <a href="/llms.txt">llms.txt</a>
-    </span>
+    <p>{profile.education[0]!.title}, {profile.education[0]!.org.split(',')[0]}, {profile.education[0]!.when} · {profile.awards[0]!.split(':')[0]}</p>
+    <p class="foot-links">
+      <a href={profile.linkedin}>LinkedIn</a><a href={profile.github}>GitHub</a><a href="/resume/">Résumé</a>
+      <a href="/log/">Field log</a><a href="/profile.json">profile.json</a><a href="/llms.txt">llms.txt</a>
+    </p>
+    <p class="dim">Built with Astro. No trackers, no cookies.</p>
   </footer>
+  <script is:inline>
+    // Copy-email buttons (hidden without JS) and the pointer glow on rows. Nothing else runs.
+    document.querySelectorAll('[data-copy]').forEach(b => {
+      b.hidden = false
+      b.addEventListener('click', async () => {
+        try { await navigator.clipboard.writeText(b.dataset.copy); b.nextElementSibling.textContent = 'Copied' } catch { b.nextElementSibling.textContent = 'Copy failed' }
+        setTimeout(() => (b.nextElementSibling.textContent = ''), 2000)
+      })
+    })
+    if (matchMedia('(pointer: fine)').matches) {
+      document.addEventListener('pointermove', e => {
+        const el = e.target.closest && e.target.closest('.glow')
+        if (!el) return
+        const r = el.getBoundingClientRect()
+        el.style.setProperty('--x', `${e.clientX - r.left}px`)
+        el.style.setProperty('--y', `${e.clientY - r.top}px`)
+      }, { passive: true })
+    }
+  </script>
 </body>
 </html>
 
 <style is:global>
   :root {
-    --paper: #f4efe4; --paper-2: #ebe3d1; --card: #fbf8f1;
-    --ink: #1c2733; --ink-2: #4b5765; --line: #d3c8b1; --line-2: #e2d9c6;
-    --route: #c2410c; --cleared: #2c6a4b; --active: #8a5a00; --fog: #5f6974;
-    --focus: #1d4ed8;
-    --display: 'Fraunces', Georgia, serif;
-    --sans: 'IBM Plex Sans', -apple-system, 'Segoe UI', sans-serif;
-    --mono: 'IBM Plex Mono', ui-monospace, monospace;
-    color-scheme: light dark;
+    --bg: #0B0D17; --surface: #141828; --ink: #EEF0FA; --ink-2: #A3A9C2; --rule: #262B40;
+    --kyndryl: #3DD6C4; --upl: #F5B544; --oss: #A78BFA; --frontier: #FF6FAE;
+    --ok: #4ADE80; --uat: #7DB4FF; --band: 12%;
+    --accent: var(--frontier);
+    --spectrum: linear-gradient(90deg, var(--kyndryl), var(--upl), var(--oss), var(--frontier));
+    --display: 'Bricolage Grotesque', 'Arial Black', system-ui, sans-serif;
+    --body: 'Geist', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    color-scheme: dark light;
   }
-  @media (prefers-color-scheme: dark) {
+  @media (prefers-color-scheme: light) {
     :root {
-      --paper: #0f1620; --paper-2: #152131; --card: #162232;
-      --ink: #ebe5d8; --ink-2: #a9b3bf; --line: #2a3a4e; --line-2: #1f2d3e;
-      --route: #ff8a50; --cleared: #6cc79a; --active: #f0b84f; --fog: #8b96a3;
-      --focus: #8ab4ff;
+      --bg: #F7F6F2; --surface: #FFFFFF; --ink: #12131A; --ink-2: #4A4F60; --rule: #DDDAD2;
+      --kyndryl: #00705F; --upl: #8F5300; --oss: #6236D0; --frontier: #B01F66;
+      --ok: #166534; --uat: #1D4FBF; --band: 10%;
     }
   }
+  [data-chapter='kyndryl'] { --accent: var(--kyndryl); }
+  [data-chapter='upl'] { --accent: var(--upl); }
+  [data-chapter='oss'] { --accent: var(--oss); }
+  [data-chapter='frontier'] { --accent: var(--frontier); }
+
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 64px; }
   body {
-    margin: 0; background: var(--paper); color: var(--ink);
-    font: 16px/1.6 var(--sans); min-height: 100vh; display: flex; flex-direction: column;
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 1.0625rem/1.6 var(--body); font-feature-settings: 'tnum' 0;
   }
-  main { flex: 1; width: 100%; max-width: 1120px; margin: 0 auto; padding: 0 16px 64px; }
-  a { color: inherit; text-decoration-color: var(--route); text-underline-offset: 3px; }
-  a:hover { color: var(--route); }
-  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
-  h1, h2, h3 { font-family: var(--display); font-variation-settings: 'SOFT' 50; line-height: 1.15; letter-spacing: -0.01em; }
-  .mono { font-family: var(--mono); }
-  .eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
-  .skip { position: absolute; left: -999px; top: 8px; background: var(--ink); color: var(--paper); padding: 8px 12px; border-radius: 6px; z-index: 10; }
+  @media (max-width: 1023px) { body { padding-bottom: calc(56px + env(safe-area-inset-bottom)); } }
+  a { color: inherit; text-underline-offset: 3px; text-decoration-color: color-mix(in oklch, var(--accent) 70%, transparent); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+  h1, h2, h3 { font-family: var(--display); }
+  .eyebrow { font: 500 .75rem/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin: 0; }
+  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+  @media (max-width: 720px) { .wrap { padding: 0 16px; } }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 6px; z-index: 50; }
   .skip:focus { left: 8px; }
 
-  .top {
-    max-width: 1120px; margin: 0 auto; width: 100%; padding: 18px 16px;
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-  }
-  .brand { display: inline-flex; align-items: center; gap: 10px; font: 600 17px/1 var(--display); text-decoration: none; }
-  .brand-mark { color: var(--route); font-size: 18px; }
-  .mode { display: inline-flex; border: 1.5px solid var(--ink); border-radius: 999px; padding: 3px; gap: 2px; }
-  .mode a {
-    font: 500 13px/1 var(--mono); padding: 8px 14px; border-radius: 999px; text-decoration: none;
-    min-height: 32px; display: inline-flex; align-items: center;
-  }
-  .mode a[aria-current='page'] { background: var(--ink); color: var(--paper); }
-
-  .foot {
-    max-width: 1120px; margin: 0 auto; width: 100%; padding: 24px 16px 32px;
-    border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 24px;
-    justify-content: space-between; font: 13px/1.5 var(--mono); color: var(--ink-2);
-  }
-  .foot-links { display: inline-flex; gap: 16px; flex-wrap: wrap; }
-
-  .chip {
-    display: inline-block; font: 500 12px/1 var(--mono); padding: 6px 9px; border-radius: 6px;
-    background: var(--paper-2); color: var(--ink); border: 1px solid var(--line-2);
-  }
   .btn {
-    display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px;
-    border-radius: 10px; border: 1.5px solid var(--ink); font: 600 15px/1 var(--sans); text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px;
+    border-radius: 6px; border: 1.5px solid var(--ink); color: var(--ink); background: transparent;
+    font: 600 1rem/1 var(--body); text-decoration: none; transition: background .15s, color .15s, border-color .15s;
   }
-  .btn.primary { background: var(--ink); color: var(--paper); }
-  .btn.primary:hover { background: var(--route); border-color: var(--route); color: var(--paper); }
+  .btn:hover { border-color: var(--accent); }
+  .btn.primary { background: var(--ink); color: var(--bg); }
+  .btn.primary:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+  .btn.sm { min-height: 34px; padding: 0 14px; font-size: .875rem; }
 
-  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+  /* Pointer glow: a radial gradient in the element's chapter hue that follows the cursor (pointer:fine only). */
+  .glow { position: relative; isolation: isolate; }
+  .glow::after {
+    content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .2s; pointer-events: none;
+    background: radial-gradient(420px circle at var(--x, 50%) var(--y, 50%), color-mix(in oklch, var(--accent) 16%, transparent), transparent 70%);
+  }
+  .glow:hover::after, .glow:focus-within::after { opacity: 1; }
+
+  .progress { position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 30; pointer-events: none; display: none; }
+  .progress i { display: block; height: 100%; background: var(--spectrum); transform-origin: left; transform: scaleX(0); }
+
+  .foot { max-width: 1200px; margin: 0 auto; padding: 48px 32px 56px; border-top: 1px solid var(--rule); color: var(--ink-2); font: .8125rem/1.6 var(--mono); }
+  .foot p { margin: 0 0 8px; }
+  .foot-links { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .dim { opacity: .8; }
+
+  /* Scroll-driven motion: native CSS only, and only where supported and wanted. Content is complete without it. */
+  @supports (animation-timeline: view()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .reveal { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% cover 25%; }
+      .progress { display: block; }
+      .progress i { animation: grow linear both; animation-timeline: scroll(root); }
+      .ink-fill {
+        background: var(--spectrum) no-repeat 0 0 / 0% 100%, linear-gradient(var(--ink), var(--ink));
+        -webkit-background-clip: text; background-clip: text; color: transparent;
+        animation: fill linear both; animation-timeline: view(); animation-range: entry 10% entry 60%;
+      }
+    }
+  }
+  @keyframes rise { from { opacity: .001; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes grow { to { transform: scaleX(1); } }
+  @keyframes fill { to { background-size: 100% 100%, 100% 100%; } }
+
+  @view-transition { navigation: auto; }
+  ::view-transition-group(*) { animation-duration: 280ms; animation-timing-function: cubic-bezier(.2, .7, .2, 1); }
+  @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
+
+  @media print {
+    .bar, .progress, .foot, .skip { display: none !important; }
+    body { background: #fff; color: #000; padding: 0; }
+  }
 </style>

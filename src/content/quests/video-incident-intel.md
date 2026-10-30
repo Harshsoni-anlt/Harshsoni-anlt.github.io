@@ -21,6 +21,14 @@ resumeLine: Video Q&A pipeline where users write their own checks; local samplin
 boss:
   name: The confident false alarm
   story: A hi-vis check filed a high-severity incident at 0.95 confidence on a clip with no people in it, because "no" meant nobody was there. Fixed with a distinct n/a answer. One of nine bugs on this project, and not one was found by reading code.
+headline: "96.5% of frames dropped by sampling; a local motion filter removes 66% more on average (10–88% by clip)."
+featured: true
+limitation: "Measured on 4 clips."
+traits:
+  measure: "4-clip sweep"
+  cantTell: "n/a answer"
+  localGate: "motion filter"
+  byod: "your footage"
 ---
 
 - A check is a plain-language question plus an answer shape: yes/no, count, one-of, or free text.

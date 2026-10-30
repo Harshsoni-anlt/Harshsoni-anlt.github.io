@@ -30,6 +30,9 @@ jobs:
       - run: npm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Either check failing stops the deploy.
+      - run: node scripts/contrast.mjs
+      - run: node scripts/check-html.mjs
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

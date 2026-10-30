@@ -1,0 +1,64 @@
+---
+// Opt-in mini-game, zero JS: a radio choice reveals the answer through :has(:checked).
+// Every round is a real measured failure from the projects above, not a made-up example.
+const ROUNDS = [
+  {
+    q: 'At −10 dB of background noise, a speaker said “aisle four, bay seven”. What did the transcription model return?',
+    options: ['aisle four, bay seven', 'apartment 4 day care', '[inaudible]'],
+    correct: 1,
+    answer: 'It invented “apartment 4 day care”. Models don’t fail loudly in noise; they make things up. FieldNote now refuses recordings below its noise gate instead.',
+  },
+  {
+    q: 'A product photo of a backpack. Which field can the photo not actually confirm?',
+    options: ['Colour', 'Capacity in litres', 'Category: backpack'],
+    correct: 1,
+    answer: 'Capacity (and waterproofing) came back unconfirmed on every real photo tested. Listing Lens flags them instead of guessing.',
+  },
+  {
+    q: 'The same photo, heavily blurred. What brand should the system report?',
+    options: ['Its best guess', 'Unknown'],
+    correct: 1,
+    answer: '“Unknown”. Brand confidence fell from 0.99 to 0.10 on the blurred photo, and a local sharpness check now refuses it before any API spend.',
+  },
+]
+---
+<section class="game" aria-labelledby="game-h">
+  <p class="eyebrow">Mini-game · optional</p>
+  <h3 id="game-h">Spot the invented field</h3>
+  {ROUNDS.map((r, i) => (
+    <fieldset class="round">
+      <legend>{i + 1}. {r.q}</legend>
+      <div class="opts">
+        {r.options.map((o, j) => (
+          <label class={j === r.correct ? 'right' : 'wrong'}>
+            <input type="radio" name={`round-${i}`} value={o} />
+            <span>{o}</span>
+          </label>
+        ))}
+      </div>
+      <div class="answer"><div><p>{r.answer}</p></div></div>
+    </fieldset>
+  ))}
+</section>
+
+<style>
+  .game { margin-top: 56px; padding: 28px; border: 1px dashed var(--accent); border-radius: 6px; }
+  h3 { font: 700 1.5rem/1.2 var(--display); margin: 6px 0 18px; }
+  .round { border: 0; margin: 0 0 22px; padding: 0; }
+  legend { font-weight: 600; margin-bottom: 10px; padding: 0; }
+  .opts { display: flex; flex-wrap: wrap; gap: 10px; }
+  label {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; cursor: pointer;
+    border: 1.5px solid var(--rule); border-radius: 6px; background: var(--surface); font: 500 .9375rem var(--mono);
+  }
+  label:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 3px; }
+  input { accent-color: var(--accent); }
+  .round:has(input:checked) label.right { border-color: var(--ok); }
+  .round:has(input:checked) label.right span::after { content: ' ✓ the real answer'; color: var(--ok); }
+  label.wrong:has(input:checked) { border-color: var(--ink-2); }
+  .answer { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .2s; }
+  .answer > div { overflow: hidden; }
+  .answer p { margin: 12px 0 0; color: var(--ink-2); max-width: 70ch; }
+  .round:has(input:checked) .answer { grid-template-rows: 1fr; }
+  @media (prefers-reduced-motion: reduce) { .answer { transition: none; } }
+</style>

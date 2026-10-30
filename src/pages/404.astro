@@ -1,0 +1,18 @@
+---
+import Base from '../layouts/Base.astro'
+import ContactHub from '../components/ContactHub.astro'
+---
+<Base title="Not found · Harsh Soni" description="This page doesn't exist.">
+  <section class="wrap nf">
+    <p class="eyebrow">404</p>
+    <h1>This page doesn’t exist. The rest of the site does.</h1>
+    <p><a href="/">Back to the start</a>, or get in touch directly:</p>
+    <ContactHub variant="hero" />
+  </section>
+</Base>
+
+<style>
+  .nf { padding-top: 96px; padding-bottom: 120px; }
+  h1 { font: 750 clamp(2rem, 5vw, 3.5rem)/1.05 var(--display); letter-spacing: -0.02em; max-width: 20ch; margin: 12px 0 18px; }
+  p { color: var(--ink-2); }
+</style>

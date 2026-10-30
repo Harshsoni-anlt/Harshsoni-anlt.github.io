@@ -21,6 +21,11 @@ resumeLine: Multi-agent warehouse assistant (LangGraph, 19 MCP tools) answering 
 boss:
   name: The read query that wrote to the database
   story: Asking "show me recent safety incidents" filed a brand-new incident describing the question. Caught while recording the demo, not by any test. The runner-up was a substring router that matched "Acme Steel Bolts" to "bol" (bill of lading).
+headline: "45 tests where there were none; 19 MCP tools; stock answers come from SQL rows, not the model."
+featured: false
+traits:
+  measure: "29 routing regression tests"
+  byod: "your CSVs"
 ---
 
 - A LangGraph planner routes each question to one of six agents: inventory, equipment, operations, safety, forecasting, documents.

@@ -21,6 +21,14 @@ resumeLine: Voice-to-structured-record tool for Hindi and Hinglish field notes; 
 boss:
   name: The recording that couldn't play itself back
   story: Recorded notes failed to decode because the browser's recording container carried no duration. Uploads worked the whole time, which is why it hid. Fixed by capturing raw PCM.
+headline: "6/6 fields correct down to −5 dB noise (synthetic speech)."
+featured: true
+limitation: "Below −10 dB it refuses instead of inventing. Not yet tested on a real voice; every test so far used synthetic speech."
+traits:
+  measure: "SNR sweep"
+  cantTell: "not heard"
+  localGate: "noise gate"
+  byod: "your form"
 ---
 
 - Your form becomes the response schema at request time, so you decide the fields.

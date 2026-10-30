@@ -1,19 +1,20 @@
 # Harsh Soni: portfolio
 
-The journey as a trail map: each shipped project is a quest, its measured results are the XP,
-and the bug that nearly got away is the boss. One click switches to a plain résumé for
+Four colour-coded chapters (Kyndryl, UPL, open source, frontier field log), a method grid that shows the same four rules in every system,
+and one contact hub with résumé, email, booking, LinkedIn and GitHub. A plain résumé page prints cleanly for
 recruiters in a hurry.
 
-Static [Astro](https://astro.build) site. No backend, no client framework, no tracking cookies.
+Static [Astro](https://astro.build) site, under 0.5 KB of JavaScript. No backend, no trackers. Motion is native CSS scroll-driven animation and switches off under reduced motion.
 
 ## Adding a project
 
-Add one Markdown file to `src/content/quests/`. The schema in `src/content.config.ts` says what
-goes in it. Every page regenerates from these files: the map, the quest log, the achievements,
-the résumé, `profile.json` and `llms.txt`.
+Add one Markdown file to `src/content/quests/` (open source), `src/content/work/` (day job, no client
+names) or `src/content/log/` (a model tested). The schemas in `src/content.config.ts` say what goes in
+each. The index rows, method grid, level count, résumé page, `profile.json` and `llms.txt` regenerate.
 
 - `xp` holds measured results only, each with a number behind it.
-- Achievements are computed from the files (`src/lib/achievements.ts`) and never written by hand.
+- The level and the "solution wizard" label are computed from the files (`src/lib/achievements.ts`); if the data stops supporting them they disappear.
+- `scripts/contrast.mjs` and `scripts/check-html.mjs` run in CI after the build; either failing blocks the deploy.
 - Repo stars and last-commit dates come from the GitHub API at build time. An offline build
   still works and leaves them out.
 
@@ -33,6 +34,6 @@ Set `GITHUB_TOKEN` to avoid the API's anonymous rate limit, and `SITE` to the pu
 |---|---|
 | `src/content/quests/*.md` | One file per project |
 | `src/data/profile.ts` | Name, role, experience, education, working rules |
-| `src/components/QuestMap.astro` | The SVG trail map |
+| `src/components/` | Contact hub, chapter band, status pill, mini-game |
 | `src/pages/resume.astro` | Recruiter view (prints cleanly to PDF) |
 | `src/pages/profile.json.ts`, `llms.txt.ts` | Machine-readable profile for screeners and AI tools |

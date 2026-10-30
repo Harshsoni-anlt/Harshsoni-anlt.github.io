@@ -21,6 +21,14 @@ resumeLine: Photo-to-listing tool with per-field visible-in-photo flags; measure
 boss:
   name: The stray zero
   story: Listings showed "Niksun Black Water Bottle0". A React condition rendered SQLite's 0 as text. Caught from a screenshot in the live pass, not by the test suite.
+headline: "A blurred photo returns brand “Unknown” instead of a guess."
+featured: true
+limitation: "The sharpness floor (200) was set from 3 photos."
+traits:
+  measure: "blur / dark test"
+  cantTell: "visible_in_photo flag"
+  localGate: "sharpness ≥ 200"
+  byod: "your fields"
 ---
 
 - A `visible_in_photo` flag on every field stopped the model inventing capacity and waterproofing: on every real photo tested, those came back unconfirmed.
