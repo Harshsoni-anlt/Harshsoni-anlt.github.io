@@ -2,16 +2,16 @@
 // Nothing on the site that isn't true on paper. No client names, no phone number.
 export const profile = {
   name: 'Harsh Soni',
-  role: 'Forward Deployed AI Engineer',
+  role: 'Forward Deployed Engineer',
   employer: 'Kyndryl',
   location: 'Bengaluru',
-  eyebrow: 'Harsh Soni · Forward Deployed AI Engineer · Kyndryl · Bengaluru',
+  eyebrow: 'Harsh Soni · Forward Deployed Engineer · Kyndryl · Bengaluru',
   headline: { before: 'I make AI work inside real businesses, and ', em: 'measure it', after: ' before I promise it.' },
-  subline: 'Banking · Supply chain · Agentic AI · Model evaluation. 5+ years taking AI from proof-of-concept to production in regulated environments.',
+  subline: 'From the RFQ to production at Kyndryl: document AI now runs at a regulated bank. Before that, UPL, where my forecasting across 23,000+ SKUs in 9 regions added USD 3M in sales and won the UPL OpenAg Awards 2024–25. 5+ years in data and AI.',
   description:
-    'Forward Deployed AI Engineer at Kyndryl. Document AI in production at a regulated bank, demand forecasting across 9 regions at UPL, and open-source systems that measure each new AI capability before trusting it.',
+    'Forward Deployed Engineer at Kyndryl. Document AI in production at a regulated bank, demand forecasting across 9 regions at UPL, and open-source systems that measure each new AI capability before trusting it.',
   about:
-    "I'm a Forward Deployed AI Engineer at Kyndryl. My job is to take AI out of the demo and into regulated, messy production. For a regulated bank I built the document pipeline that turned scanned account-opening forms into clean records, from POC to the process the bank now runs on. Before Kyndryl I spent four years as a data scientist at UPL, where I built SKU-level demand forecasting across 9 global regions (USD 3M incremental sales) and a GenAI system that automates regulatory dossiers. Outside work I ship open-source systems that test each new AI capability against real constraints. The rule is the same everywhere: measure the risk before building, give the system an honest “can't tell”, and put a free local check in front of every paid API call.",
+    "Forward Deployed Engineer at Kyndryl: I'm in the room for the RFQ, the proposal and the architecture, and still on the hook when it runs in production, as it now does at a regulated bank. Before that I spent four years as a data scientist at UPL, building demand forecasting for 23,000+ SKUs across 9 regions that won the UPL OpenAg Awards 2024–25, then bringing GenAI into regulatory work. I trained in economics (B.Com (Hons.), University of Kota) and analytics (Master of Analytics, Tata Institute of Social Sciences (TISS), Mumbai), so I start every AI problem with the business question. Outside work I build in public, measuring each new AI capability against a real constraint before I trust it.",
 
   // Harsh: résumé email is harshsoni.hsw@gmail.com, GitHub profile has harshsoni.skha@gmail.com. Pending his choice.
   email: 'harshsoni.skha@gmail.com',
@@ -22,15 +22,22 @@ export const profile = {
   resumeUpdated: 'Oct 2026',
 
   experience: [
-    { org: 'Kyndryl', title: 'Lead II, Forward Deployed Engineer', when: 'Jan 2026 – present', what: 'Enterprise AI for regulated clients: document intelligence, GenAI triage, and a multi-agent platform used across engagements.' },
-    { org: 'UPL', title: 'Data Scientist', when: 'Jan 2022 – Jan 2026', what: 'Demand forecasting for 23–24K SKUs in 9 regions, GenAI dossier automation, Text-to-SQL, churn modelling. Mentored a team of 3.' },
+    { org: 'Kyndryl', title: 'Lead II, Forward Deployed Engineer', when: 'Jan 2026 – present', what: 'Client-facing AI delivery: RFQs, proposals and solution architecture, then PoC to production. Document intelligence in production at a regulated bank, GenAI triage, a multi-agent platform, GPU serving with vLLM.' },
+    { org: 'UPL', title: 'Data Scientist, Digital & Analytics CoE', when: 'Jan 2022 – Jan 2026', what: 'Forecasting 23,000+ SKUs across 9 regions with 30+ models; GenAI regulatory dossiers, Text-to-SQL, churn modelling, MLOps. Technical lead; mentored a team of 3.' },
+    { org: 'Hindustan Petroleum Corporation Limited (HPCL)', title: 'Data Science Intern', when: 'Jun – Aug 2021', what: 'Semantic search over employee surveys in R (88% accuracy) and a Shiny dashboard HR used to form teams. Became my Master’s dissertation.' },
+    { org: 'HCL Foundation', title: 'Data Analytics Intern', when: 'Dec 2020 – Feb 2021', what: 'Measured COVID-19’s social, economic and psychological impact on Uday programme beneficiaries; dashboards and recommendations.' },
   ],
   education: [
-    { org: 'Tata Institute of Social Sciences (TISS), Mumbai', title: 'Master of Analytics (Financial Econometrics)', when: '2022' },
-    { org: 'University of Kota', title: 'B.Com (Hons.), Economics & Financial Administration', when: '2020' },
+    { org: 'Tata Institute of Social Sciences (TISS), Mumbai', title: 'Master of Analytics, Financial Econometrics', when: '2020 – 2022', note: 'Dissertation: NLP-based HR survey analytics system, extended from the HPCL internship.' },
+    { org: 'University of Kota', title: 'B.Com (Hons.), Economic Administration & Financial Management', when: '2017 – 2020', note: 'Economics, finance and the business side every model has to answer to.' },
   ],
-  awards: ['UPL OpenAg Award 2025: excellence in demand forecasting & supply-chain modelling', 'Databricks GenAI Innovation Award 2025 (UPL team)', 'DeepLearning.AI TensorFlow Developer Specialization'],
-
+  awards: [
+    'UPL OpenAg Awards 2024–25 · Living the Values: “Win win win” award, winner, with a Certificate of Excellence, for the AI demand-forecasting engine',
+    'Databricks GenAI Innovation Award 2025, as part of the UPL team',
+    'Forward Deployed Engineer – Foundation, Kyndryl (Aug 2026)',
+    'DeepLearning.AI TensorFlow Developer Specialization',
+    'RS & GIS Applications, ISRO – Indian Institute of Remote Sensing (2020)',
+  ],
   proof: [
     { value: 'USD 3M', label: 'incremental sales from demand forecasting' },
     { value: '+30–35%', label: 'forecast accuracy' },
@@ -61,8 +68,8 @@ export const profile = {
   // A few things off the clock. Kept short on purpose.
   offClock: [
     { name: 'Road trips', line: 'Kerala, Wayanad, Ooty, Kodaikanal, Braj. Bucket list: everywhere.' },
-    { name: 'Runner', line: 'Race-day bibs and early starts.' },
-    { name: 'Would volunteer for', line: 'Humanitarian relief, economic empowerment, sport, science & tech.' },
+    { name: 'Runner', line: 'Early starts, race days.' },
+    { name: 'Would volunteer for', line: 'Humanitarian relief and economic empowerment, the same ground my first data project covered at HCL Foundation.' },
   ],
 
   method: [

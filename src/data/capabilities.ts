@@ -21,7 +21,7 @@ export const CAPABILITIES: Capability[] = [
     hue: 'kyndryl',
     skills: ['LangGraph', 'CrewAI', 'MCP tools', 'Task planning', 'Guardrails', 'Text-to-SQL'],
     proof: [
-      { label: 'Multi-agent platform used across client engagements', href: '/#work' },
+      { label: 'Contributor to Kyndryl’s internal multi-agent platform', href: '/#work' },
       { label: 'GenAI triage for card service requests, in UAT', href: '/#work' },
       { label: 'WarehouseOps AI: six agents, 19 MCP tools', href: '/quests/warehouseops-ai/' },
       { label: 'Text-to-SQL for business users', href: '/#work' },
@@ -35,10 +35,10 @@ export const CAPABILITIES: Capability[] = [
     hue: 'upl',
     skills: ['SARIMAX', 'XGBoost', 'Prophet', 'Churn models', 'Power BI'],
     proof: [
-      { label: '23–24K SKUs, 9 regions: USD 3M incremental sales', href: '/#work' },
+      { label: '23,000+ SKUs, 9 regions: USD 3M incremental sales', href: '/#work' },
       { label: '+30–35% forecast accuracy, USD 1.3M inventory saved', href: '/#work' },
       { label: 'Churn model on SAP data', href: '/#work' },
-      { label: 'UPL OpenAg Award 2025' },
+      { label: 'UPL OpenAg Awards 2024–25, for this forecasting work' },
     ],
   },
   {
@@ -70,13 +70,15 @@ export const CAPABILITIES: Capability[] = [
   },
   {
     id: 'architecture',
-    name: 'Solution architecture & client delivery',
-    short: 'Client delivery',
-    problem: 'Our POC impressed everyone, then stalled before production.',
+    name: 'Consulting & client delivery',
+    short: 'Consulting',
+    problem: 'We need someone who can scope it, price it, and then actually ship it.',
     hue: 'kyndryl',
-    skills: ['POC → production', 'Regulated data', 'Stakeholders', 'Mentoring'],
+    skills: ['RFQs & proposals', 'Solution architecture', 'PoC → production', 'Regulated data', 'Stakeholders', 'Mentoring'],
     proof: [
-      { label: 'Bank onboarding: POC to the process the bank runs on', href: '/#work' },
+      { label: 'RFQs, proposals and architectures for enterprise clients at Kyndryl', href: '/#work' },
+      { label: 'Represented Kyndryl at the ETCIO Annual Conclave 2026', href: '/#journey' },
+      { label: 'Bank onboarding: PoC to the process the bank runs on', href: '/#work' },
       { label: 'Card triage: unattended daily job, in UAT', href: '/#work' },
       { label: 'Mentored 3 data scientists and interns', href: '/#work' },
     ],

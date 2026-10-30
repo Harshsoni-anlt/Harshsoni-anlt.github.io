@@ -8,8 +8,8 @@ const { variant } = Astro.props
 // Vite resolves the glob from the project root, so this holds whatever directory the build runs from.
 const hasPdf = Object.keys(import.meta.glob('/public/resume.pdf')).length > 0
 const resume = hasPdf
-  ? { href: '/resume.pdf', label: `Download résumé · PDF · ${profile.resumeUpdated}`, short: 'Résumé', download: true }
-  : { href: '/resume/', label: 'Résumé', short: 'Résumé', download: false }
+  ? { href: '/resume.pdf', label: `Download résumé · PDF · ${profile.resumeUpdated}`, tile: 'One-page PDF', short: 'Résumé', download: true }
+  : { href: '/resume/', label: 'Résumé', tile: 'View the one-page résumé', short: 'Résumé', download: false }
 const book = profile.cal.intro
   ? { href: profile.cal.intro, label: 'Hiring? 20-min intro' }
   : { href: `mailto:${profile.email}?subject=Intro%20call`, label: 'Book a call' }
@@ -24,16 +24,19 @@ const book = profile.cal.intro
 {variant === 'bar' && (
   <>
     <header class="bar top" aria-label="Site">
-      <a class="name" href="/">{profile.name}</a>
-      <nav aria-label="Sections">
-        <a href="/#kyndryl">Work</a><a href="/#oss">Systems</a><a href="/log/">Log</a><a href="/#contact">Contact</a>
-      </nav>
-      <span class="bar-cta">
-        <a class="btn sm" href={resume.href} download={resume.download || undefined}>{resume.short}</a>
-        <a class="btn sm primary" href={book.href}>Book</a>
-      </span>
+      <div class="bar-in">
+        <a class="name" href="/">{profile.name}</a>
+        <nav aria-label="Sections">
+          <a href="/#journey">Story</a><a href="/#work">Work</a><a href="/#systems">Systems</a><a href="/log/">Log</a><a href="/#contact">Contact</a>
+        </nav>
+        <span class="bar-cta">
+          <a class="btn sm primary" href={resume.href} download={resume.download || undefined}>{resume.short}</a>
+          <a class="btn sm" href={book.href}>Book a call</a>
+        </span>
+      </div>
     </header>
-    <nav class="bar bottom" aria-label="Contact">
+    <nav class="bar bottom" aria-label="Quick links">
+      <a href="/#work">Work</a>
       <a href={resume.href} download={resume.download || undefined}>Résumé</a>
       <a href={`mailto:${profile.email}`}>Email</a>
       <a href={book.href}>Book</a>
@@ -44,7 +47,7 @@ const book = profile.cal.intro
 {variant === 'full' && (
   <div class="hub full">
     <a class="tile" href={resume.href} download={resume.download || undefined}>
-      <span class="k">Résumé</span><span class="v">{resume.label}</span>
+      <span class="k">Résumé</span><span class="v">{resume.tile}</span>
     </a>
     <a class="tile" href={book.href}>
       <span class="k">Talk</span><span class="v">{book.label}</span>
@@ -71,36 +74,35 @@ const book = profile.cal.intro
   .hub.full { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   @media (max-width: 640px) { .hub.full { grid-template-columns: 1fr; } }
   .tile {
-    display: flex; flex-direction: column; gap: 6px; min-height: 48px; padding: 20px;
-    background: var(--surface); border: 1px solid var(--rule); border-radius: 6px; text-decoration: none; color: var(--ink);
+    display: flex; flex-direction: column; gap: 8px; min-height: 48px; padding: 24px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface)); border: 1px solid var(--rule); border-radius: 22px; text-decoration: none; color: var(--ink);
+    transition: border-color .25s;
   }
-  a.tile:hover { border-color: var(--accent, var(--frontier)); }
+  @media (hover: hover) { a.tile:hover { border-color: color-mix(in oklch, var(--ink) 30%, transparent); } }
   .k { font: 500 .75rem/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
   .v { font: 600 1.125rem/1.35 var(--display); overflow-wrap: anywhere; }
-  .v a { color: inherit; }
+  .v a { color: inherit; display: inline-flex; align-items: center; min-height: 44px; }
   .links { display: flex; gap: 20px; flex-wrap: wrap; }
-  .links a { display: inline-flex; align-items: center; gap: 8px; min-height: 32px; }
+  .links a { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; }
   .links svg { width: 18px; height: 18px; fill: currentColor; }
-  .copy { margin-left: 10px; font: 500 .8125rem var(--mono); padding: 4px 10px; min-height: 28px; border-radius: 6px; border: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer; vertical-align: middle; }
+  .copy { margin-left: 10px; font: 500 .8125rem var(--mono); padding: 0 14px; min-height: 44px; border-radius: 999px; border: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer; vertical-align: middle; }
   .copied { font: 500 .8125rem var(--mono); color: var(--ok); margin-left: 6px; }
   .avail { grid-column: 1 / -1; margin: 4px 0 0; font: .8125rem var(--mono); color: var(--ink-2); }
 
   .bar { z-index: 20; background: color-mix(in oklch, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
-  .bar.top {
-    position: sticky; top: 0; height: 52px; display: flex; align-items: center; gap: 24px;
-    padding: 0 32px; border-bottom: 1px solid var(--rule);
-  }
-  .bar.top .name { font: 700 1rem/1 var(--display); text-decoration: none; color: var(--ink); margin-right: auto; }
+  .bar.top { position: sticky; top: 0; height: 56px; border-bottom: 1px solid var(--rule); }
+  .bar-in { max-width: 1200px; height: 100%; margin: 0 auto; padding: 0 32px; display: flex; align-items: center; gap: 24px; }
+  .bar.top .name { font: 700 1rem/1 var(--display); letter-spacing: -0.02em; text-decoration: none; color: var(--ink); margin-right: auto; display: inline-flex; align-items: center; min-height: 44px; }
   .bar.top nav { display: flex; gap: 22px; }
-  .bar.top nav a { font: 500 .875rem var(--body); color: var(--ink-2); text-decoration: none; }
+  .bar.top nav a { font: 500 .875rem var(--body); color: var(--ink-2); text-decoration: none; transition: color .2s; }
   .bar.top nav a:hover { color: var(--ink); }
   .bar-cta { display: flex; gap: 8px; }
   .bar.bottom { display: none; }
   @media (max-width: 1023px) {
     .bar.top nav, .bar-cta { display: none; }
-    .bar.top { padding: 0 16px; }
+    .bar-in { padding: 0 16px; }
     .bar.bottom {
-      display: grid; grid-template-columns: repeat(3, 1fr); position: fixed; left: 0; right: 0; bottom: 0;
+      display: grid; grid-template-columns: repeat(4, 1fr); position: fixed; left: 0; right: 0; bottom: 0;
       height: calc(56px + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom);
       border-top: 1px solid var(--rule);
     }

@@ -19,11 +19,10 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={canonical} />
-  <meta name="theme-color" content="#0B0D17" media="(prefers-color-scheme: dark)" />
-  <meta name="theme-color" content="#F7F6F2" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#07080B" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=Geist:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
 </head>
 <body class={print ? 'print' : undefined}>
   <a class="skip" href="#main">Skip to content</a>
@@ -31,7 +30,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
   <ContactHub variant="bar" />
   <main id="main"><slot /></main>
   <footer class="foot">
-    <p>{profile.education[0]!.title}, {profile.education[0]!.org.split(',')[0]}, {profile.education[0]!.when} · {profile.awards[0]!.split(':')[0]}</p>
     <p class="foot-links">
       <a href={profile.linkedin}>LinkedIn</a><a href={profile.github}>GitHub</a><a href="/resume/">Résumé</a>
       <a href="/log/">Field log</a><a href="/profile.json">profile.json</a><a href="/llms.txt">llms.txt</a>
@@ -61,87 +59,81 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
 </html>
 
 <style is:global>
+  /* One neutral base + one chromatic gradient. Colour is a finish, not a palette. */
   :root {
-    --bg: #0B0D17; --surface: #141828; --ink: #EEF0FA; --ink-2: #A3A9C2; --rule: #262B40;
-    --kyndryl: #3DD6C4; --upl: #F5B544; --oss: #A78BFA; --frontier: #FF6FAE;
-    --ok: #4ADE80; --uat: #7DB4FF; --band: 12%;
-    --accent: var(--frontier);
-    --spectrum: linear-gradient(90deg, var(--kyndryl), var(--upl), var(--oss), var(--frontier));
-    --display: 'Bricolage Grotesque', 'Arial Black', system-ui, sans-serif;
+    --bg: #07080B; --surface: #0E1016; --surface-2: #141721; --ink: #F4F5F8; --ink-2: #A2A7B6; --rule: #1E2230;
+    --c1: #7DF9FF; --c2: #7C9CFF; --c3: #B98CFF; --c4: #FF86C8; --c5: #FFC48A;
+    --chroma: linear-gradient(100deg, var(--c1), var(--c2) 28%, var(--c3) 52%, var(--c4) 76%, var(--c5));
+    --spectrum: var(--chroma);
+    /* Older names, kept so components written against them still resolve. */
+    --kyndryl: var(--c1); --upl: var(--c5); --oss: var(--c3); --frontier: var(--c4);
+    --ok: #6EE7A8; --uat: #8FB4FF; --accent: var(--c3); --band: 0%;
+    --display: 'Geist', -apple-system, 'Segoe UI', system-ui, sans-serif;
     --body: 'Geist', -apple-system, 'Segoe UI', system-ui, sans-serif;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    color-scheme: dark light;
+    --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    color-scheme: dark;
   }
-  @media (prefers-color-scheme: light) {
-    :root {
-      --bg: #F7F6F2; --surface: #FFFFFF; --ink: #12131A; --ink-2: #4A4F60; --rule: #DDDAD2;
-      --kyndryl: #00705F; --upl: #8F5300; --oss: #6236D0; --frontier: #B01F66;
-      --ok: #166534; --uat: #1D4FBF; --band: 10%;
-    }
-  }
-  [data-chapter='kyndryl'] { --accent: var(--kyndryl); }
-  [data-chapter='upl'] { --accent: var(--upl); }
-  [data-chapter='oss'] { --accent: var(--oss); }
-  [data-chapter='frontier'] { --accent: var(--frontier); }
 
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 64px; }
-  body {
-    margin: 0; background: var(--bg); color: var(--ink);
-    font: 1.0625rem/1.6 var(--body); font-feature-settings: 'tnum' 0;
-  }
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 72px; background: var(--bg); }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 1.0625rem/1.6 var(--body); -webkit-font-smoothing: antialiased; }
   @media (max-width: 1023px) { body { padding-bottom: calc(56px + env(safe-area-inset-bottom)); } }
-  a { color: inherit; text-underline-offset: 3px; text-decoration-color: color-mix(in oklch, var(--accent) 70%, transparent); }
-  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+  ::selection { background: color-mix(in oklch, var(--c3) 45%, transparent); }
+  a { color: inherit; text-underline-offset: 3px; text-decoration-color: color-mix(in oklch, var(--c2) 70%, transparent); }
+  :focus-visible { outline: 2px solid var(--c1); outline-offset: 3px; border-radius: 6px; }
   h1, h2, h3 { font-family: var(--display); }
-  .eyebrow { font: 500 .75rem/1.4 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); margin: 0; }
+  .eyebrow { font: 500 .75rem/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); margin: 0; }
+  .chroma-text { background: var(--chroma); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }
   .wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
   @media (max-width: 720px) { .wrap { padding: 0 16px; } }
-  .skip { position: absolute; left: -999px; top: 8px; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 6px; z-index: 50; }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 8px; z-index: 50; }
   .skip:focus { left: 8px; }
 
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 20px;
-    border-radius: 6px; border: 1.5px solid var(--ink); color: var(--ink); background: transparent;
-    font: 600 1rem/1 var(--body); text-decoration: none; transition: background .15s, color .15s, border-color .15s;
+  /* Hairline chromatic border on hover: a gradient ring drawn with a mask, no layout shift. */
+  .ring { position: relative; }
+  .ring::after {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: var(--chroma); opacity: 0; transition: opacity .35s;
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
   }
-  .btn:hover { border-color: var(--accent); }
-  .btn.primary { background: var(--ink); color: var(--bg); }
-  .btn.primary:hover { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-  .btn.sm { min-height: 34px; padding: 0 14px; font-size: .875rem; }
+  .ring:focus-within::after { opacity: 1; }
+  @media (hover: hover) { .ring:hover::after { opacity: 1; } }
 
-  /* Pointer glow: a radial gradient in the element's chapter hue that follows the cursor (pointer:fine only). */
-  .glow { position: relative; isolation: isolate; }
-  .glow::after {
-    content: ''; position: absolute; inset: 0; z-index: -1; opacity: 0; transition: opacity .2s; pointer-events: none;
-    background: radial-gradient(420px circle at var(--x, 50%) var(--y, 50%), color-mix(in oklch, var(--accent) 16%, transparent), transparent 70%);
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px;
+    border-radius: 999px; border: 1px solid var(--rule); color: var(--ink); background: var(--surface);
+    font: 500 .9375rem/1 var(--body); text-decoration: none; cursor: pointer; transition: background .2s, border-color .2s, color .2s;
   }
-  .glow:hover::after, .glow:focus-within::after { opacity: 1; }
+  .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+  @media (hover: hover) {
+    .btn:hover { border-color: color-mix(in oklch, var(--ink) 35%, transparent); }
+    .btn.primary:hover { background: var(--chroma); border-color: transparent; color: #07080B; }
+  }
+  .btn.sm { min-height: 34px; padding: 0 14px; font-size: .8125rem; }
+
+  .glow { position: relative; isolation: isolate; }
+  .glow::before {
+    content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; opacity: 0; transition: opacity .3s; pointer-events: none;
+    background: radial-gradient(360px circle at var(--x, 50%) var(--y, 50%), color-mix(in oklch, var(--c2) 14%, transparent), transparent 70%);
+  }
+  @media (hover: hover) { .glow:hover::before { opacity: 1; } }
 
   .progress { position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 30; pointer-events: none; display: none; }
-  .progress i { display: block; height: 100%; background: var(--spectrum); transform-origin: left; transform: scaleX(0); }
+  .progress i { display: block; height: 100%; background: var(--chroma); transform-origin: left; transform: scaleX(0); }
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .progress { display: block; }
+      .progress i { animation: grow linear both; animation-timeline: scroll(root); }
+    }
+  }
+  @keyframes grow { to { transform: scaleX(1); } }
 
   .foot { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 48px 32px 56px; border-top: 1px solid var(--rule); color: var(--ink-2); font: .8125rem/1.6 var(--mono); }
   .foot p { margin: 0 0 8px; }
-  .foot-links { display: flex; flex-wrap: wrap; gap: 6px 20px; }
+  .foot-links { display: flex; flex-wrap: wrap; gap: 0 22px; }
+  .foot-links a { display: inline-flex; align-items: center; min-height: 44px; }
+  @media (max-width: 720px) { .foot { padding: 32px 16px; } }
   .dim { opacity: .8; }
-
-  /* Scroll-driven motion: native CSS only, and only where supported and wanted. Content is complete without it. */
-  @supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .reveal { animation: rise linear both; animation-timeline: view(); animation-range: entry 0% cover 25%; }
-      .progress { display: block; }
-      .progress i { animation: grow linear both; animation-timeline: scroll(root); }
-      .ink-fill {
-        background: var(--spectrum) no-repeat 0 0 / 0% 100%, linear-gradient(var(--ink), var(--ink));
-        -webkit-background-clip: text; background-clip: text; color: transparent;
-        animation: fill linear both; animation-timeline: view(); animation-range: entry 10% entry 60%;
-      }
-    }
-  }
-  @keyframes rise { from { opacity: .001; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-  @keyframes grow { to { transform: scaleX(1); } }
-  @keyframes fill { to { background-size: 100% 100%, 100% 100%; } }
 
   @view-transition { navigation: auto; }
   ::view-transition-group(*) { animation-duration: 280ms; animation-timing-function: cubic-bezier(.2, .7, .2, 1); }
@@ -149,6 +141,6 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
 
   @media print {
     .bar, .progress, .foot, .skip { display: none !important; }
-    body { background: #fff; color: #000; padding: 0; }
+    html, body { background: #fff; color: #000; padding: 0; }
   }
 </style>

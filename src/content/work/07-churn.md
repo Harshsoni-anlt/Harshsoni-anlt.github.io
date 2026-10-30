@@ -4,6 +4,6 @@ chapter: upl
 title: Customer churn model
 status: shipped
 size: ledger
-built: A Random Forest model on SAP data that flags high-risk customer segments for retention. Plus automated Power BI dashboards and ML pipelines, while mentoring a team of 3 data scientists and interns.
+built: A Random Forest model on SAP sales data that flags customer segments at risk of churning, and sized a potential 8–12% revenue uplift for retention.
 stack: [Random Forest, SAP, Power BI]
 ---

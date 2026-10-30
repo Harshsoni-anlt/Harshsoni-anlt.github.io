@@ -22,7 +22,6 @@ traits:
   measure: "300-msg run"
   cantTell: "abstain < 0.8"
   localGate: "local model first"
-  byod: "your CSV"
 ---
 
 - Measurement first, product second. 300 real bank-support messages, each needing a fraud flag and one of seven teams.

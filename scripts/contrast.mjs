@@ -5,7 +5,7 @@ import { readFileSync } from 'node:fs'
 const css = readFileSync(new URL('../src/layouts/Base.astro', import.meta.url), 'utf8')
 const block = re => Object.fromEntries([...(css.match(re)?.[1] ?? '').matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{6})/g)].map(m => [m[1], m[2]]))
 const dark = block(/:root \{([\s\S]*?)\n  \}/)
-const light = { ...dark, ...block(/prefers-color-scheme: light\) \{\s*:root \{([\s\S]*?)\}/) }
+const light = block(/prefers-color-scheme: light\) \{\s*:root \{([\s\S]*?)\}/) // optional: the site may be dark-only
 
 const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255)
 const lin = c => (c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
@@ -26,25 +26,27 @@ const fromOklab = ([L, A, B]) => {
 const mix = (a, b, p) => { const [x, y] = [toOklab(a), toOklab(b)]; return fromOklab(x.map((v, i) => v * p + y[i] * (1 - p))) }
 
 // A parse miss would make every comparison NaN and "pass" silently.
-if (Object.keys(dark).length < 11 || !light.bg || light.bg === dark.bg) { console.log('FAIL: could not read colour tokens from Base.astro'); process.exit(1) }
+if (!dark.bg || !dark.ink || !dark['ink-2']) { console.log('FAIL: could not read colour tokens from Base.astro'); process.exit(1) }
 
 let failed = 0
-for (const [name, t, band] of [['dark', dark, 0.12], ['light', light, 0.10]]) {
+const schemes = [['dark', dark]]
+if (light.bg) schemes.push(['light', { ...dark, ...light }])
+for (const [name, t] of schemes) {
   const C = k => hex(t[k])
   const surfaces = { bg: C('bg'), surface: C('surface') }
-  for (const h of ['kyndryl', 'upl', 'oss', 'frontier']) surfaces[`${h}-band`] = mix(C(h), C('bg'), band)
+  if (t['surface-2']) surfaces['surface-2'] = C('surface-2')
   for (const [sname, s] of Object.entries(surfaces)) {
-    const accent = sname.endsWith('-band') ? sname.replace('-band', '') : 'frontier'
-    for (const fg of ['ink', 'ink-2', accent, 'ok', 'uat']) {
+    // Every chromatic stop is used as text (gradient text, numerals), so each must pass on its own.
+    for (const fg of ['ink', 'ink-2', 'ok', 'uat', ...['c1', 'c2', 'c3', 'c4', 'c5'].filter(k => t[k])]) {
       const r = ratio(C(fg), s)
       if (r < 4.5) { failed++; console.log(`FAIL ${name}: ${fg} on ${sname} = ${r.toFixed(2)}`) }
     }
   }
-  // Primary button: bg-coloured text on ink, and on the accent when hovered.
-  for (const fg of ['ink', 'kyndryl', 'upl', 'oss', 'frontier']) {
+  // Primary button: bg-coloured text on ink, and on each chromatic stop when hovered.
+  for (const fg of ['ink', ...['c1', 'c2', 'c3', 'c4', 'c5'].filter(k => t[k])]) {
     const r = ratio(C('bg'), C(fg))
     if (r < 4.5) { failed++; console.log(`FAIL ${name}: bg text on ${fg} button = ${r.toFixed(2)}`) }
   }
 }
-console.log(failed ? `${failed} contrast failure(s)` : 'contrast: all text pairs ≥ 4.5:1 in both schemes')
+console.log(failed ? `${failed} contrast failure(s)` : `contrast: all text pairs ≥ 4.5:1 (${schemes.map(s => s[0]).join(' + ')})`)
 process.exit(failed ? 1 : 0)

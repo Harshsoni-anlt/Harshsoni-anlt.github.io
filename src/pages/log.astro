@@ -7,9 +7,9 @@ const logs = (await getCollection('log')).sort((a, b) => +b.data.date - +a.data.
 const entries = await Promise.all(logs.map(async l => ({ l, Content: (await render(l)).Content })))
 ---
 <Base title="Frontier field log · Harsh Soni" description="New AI models and techniques, tested on real data. What held up, with numbers.">
-  <div data-chapter="frontier">
+  <div>
     <header class="wrap head">
-      <p class="eyebrow">Ch.04 · Frontier field log</p>
+      <p class="eyebrow">Field log</p>
       <h1>What I’m testing now</h1>
       <p class="lede">New models ship weekly. Each entry is one thing tested on real data, with the numbers, the caveats and what it means for a real deployment.</p>
     </header>
@@ -29,14 +29,14 @@ const entries = await Promise.all(logs.map(async l => ({ l, Content: (await rend
 
 <style>
   .head { padding-top: 64px; padding-bottom: 32px; }
-  .head .eyebrow { color: var(--accent); }
-  h1 { font: 750 clamp(2.25rem, 6vw, 4.5rem)/1.02 var(--display); letter-spacing: -0.03em; margin: 12px 0; }
+  h1 { font: 700 clamp(2.5rem, 6vw, 4.5rem)/1.02 var(--display); letter-spacing: -0.05em; margin: 12px 0; }
   .lede { font-size: 1.1875rem; color: var(--ink-2); max-width: 62ch; margin: 0; }
   .entries { list-style: none; padding-top: 16px; padding-bottom: 72px; margin: 0 auto; }
-  .entry { padding: 32px 0; border-top: 3px solid var(--accent); margin-bottom: 24px; max-width: 900px; }
+  .entry { padding: 36px; border: 1px solid var(--rule); border-radius: 22px; background: linear-gradient(180deg, var(--surface-2), var(--surface)); margin-bottom: 18px; max-width: 920px; }
+  @media (max-width: 720px) { .entry { padding: 22px; } }
   .meta { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin: 0 0 10px; }
-  .date { font: .8125rem var(--mono); color: var(--accent); }
-  .chip { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 6px; border: 1px solid var(--rule); font: 500 .75rem var(--mono); background: var(--surface); }
+  .date { font: .8125rem var(--mono); color: var(--ink-2); }
+  .chip { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; border: 1px solid var(--rule); font: 500 .75rem var(--mono); background: var(--surface); }
   h2 { font: 700 clamp(1.5rem, 3vw, 2.25rem)/1.15 var(--display); margin: 0 0 6px; }
   .model { font: .875rem var(--mono); color: var(--ink-2); margin: 0 0 12px; }
   .result { font-size: 1.125rem; margin: 0 0 18px; }
