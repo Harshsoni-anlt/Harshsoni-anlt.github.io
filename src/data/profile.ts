@@ -7,7 +7,7 @@ export const profile = {
   location: 'Bengaluru',
   eyebrow: 'Harsh Soni · Forward Deployed AI Engineer · Kyndryl · Bengaluru',
   headline: { before: 'I make AI work inside real businesses, and ', em: 'measure it', after: ' before I promise it.' },
-  subline: 'Banking · Supply chain · Agentic AI · Model evaluation. 4+ years taking AI from proof-of-concept to production in regulated environments.',
+  subline: 'Banking · Supply chain · Agentic AI · Model evaluation. 5+ years taking AI from proof-of-concept to production in regulated environments.',
   description:
     'Forward Deployed AI Engineer at Kyndryl. Document AI in production at a regulated bank, demand forecasting across 9 regions at UPL, and open-source systems that measure each new AI capability before trusting it.',
   about:
@@ -45,6 +45,24 @@ export const profile = {
     { name: 'Local & cost-aware AI', detail: 'vLLM, quantization, small-model routing, NVIDIA GPU inference' },
     { name: 'Forecasting & classical ML', detail: 'time-series ensembles, churn, MLflow, Databricks' },
     { name: 'Delivery', detail: 'FastAPI, React, Docker, Kubernetes, AWS, Azure, Power BI' },
+  ],
+
+  // The next quest: where this is all heading.
+  next: {
+    title: 'A future-ready AI engineer and leader',
+    paths: [
+      { name: 'Build my own AI product', line: 'Turn one of these systems into something people pay for.' },
+      { name: 'Forward deployed at a frontier lab', line: 'Put the newest models to work inside the hardest real deployments.' },
+      { name: 'Independent AI consultant', line: 'Walk into a business, find the process AI should fix, ship it.' },
+      { name: 'AI architect & leader', line: 'Lead teams and platforms that make AI routine across an enterprise.' },
+    ],
+  },
+
+  // A few things off the clock. Kept short on purpose.
+  offClock: [
+    { name: 'Road trips', line: 'Kerala, Wayanad, Ooty, Kodaikanal, Braj. Bucket list: everywhere.' },
+    { name: 'Runner', line: 'Race-day bibs and early starts.' },
+    { name: 'Would volunteer for', line: 'Humanitarian relief, economic empowerment, sport, science & tech.' },
   ],
 
   method: [

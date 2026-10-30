@@ -121,7 +121,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site)
   .progress { position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 30; pointer-events: none; display: none; }
   .progress i { display: block; height: 100%; background: var(--spectrum); transform-origin: left; transform: scaleX(0); }
 
-  .foot { max-width: 1200px; margin: 0 auto; padding: 48px 32px 56px; border-top: 1px solid var(--rule); color: var(--ink-2); font: .8125rem/1.6 var(--mono); }
+  .foot { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 48px 32px 56px; border-top: 1px solid var(--rule); color: var(--ink-2); font: .8125rem/1.6 var(--mono); }
   .foot p { margin: 0 0 8px; }
   .foot-links { display: flex; flex-wrap: wrap; gap: 6px 20px; }
   .dim { opacity: .8; }

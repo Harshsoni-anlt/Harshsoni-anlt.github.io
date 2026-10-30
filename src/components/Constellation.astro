@@ -1,0 +1,242 @@
+---
+import { CAPABILITIES } from '../data/capabilities'
+
+// All geometry is computed at build time; the client only toggles classes and `hidden`.
+const W = 1000, H = 640, CX = 500, CY = 320, RX = 330, RY = 212, SR = 76
+let seed = 11
+const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647 // seeded, so rebuilds don't reshuffle the sky
+const f = (n: number) => Math.round(n * 10) / 10
+const drift = () => `--dx:${f(rnd() * 8 - 4)}px;--dy:${f(rnd() * 8 - 4)}px;--t:${f(7 + rnd() * 6)}s;--d:-${f(rnd() * 12)}s`
+
+// Label boxes in viewBox units, for build-time collision avoidance (widths are estimates for 15px Geist).
+type Box = [number, number, number, number]
+const placed: Box[] = [[CX - 40, CY - 10, CX + 40, CY + 36]] // the "Harsh" core
+const clear = (b: Box) => !placed.some(p => b[0] < p[2] && b[2] > p[0] && b[1] < p[3] && b[3] > p[1])
+
+const n = CAPABILITIES.length
+const nodes = CAPABILITIES.map((c, i) => {
+  const a = -Math.PI / 2 + (i * 2 * Math.PI) / n
+  const x = CX + RX * Math.cos(a), y = CY + RY * Math.sin(a)
+  const ux = Math.cos(a) * RX / Math.hypot(RX * Math.cos(a), RY * Math.sin(a)), uy = Math.sin(a) * RY / Math.hypot(RX * Math.cos(a), RY * Math.sin(a))
+  // The pill label sits on the inward side of the node, away from the satellites.
+  const lx = x - ux * (34 + 46 * Math.abs(ux)), ly = y - uy * 34
+  const pw = c.short.length * 6 + 24 // half-width at desktop scale
+  placed.push([lx - pw, ly - 24, lx + pw, ly + 24], [x - 24, y - 24, x + 24, y + 24])
+  return { ...c, i, x, y, ux, uy, lx, ly }
+}).map(nd => {
+  const out = Math.atan2(nd.uy, nd.ux)
+  const sats = nd.skills.map((s, j) => {
+    const sa = out + (-1 + (2 * (j + 0.5)) / nd.skills.length) * 1.3 // fan ±75° around the outward direction
+    const cos = Math.cos(sa), sin = Math.sin(sa)
+    const side = Math.abs(cos) > 0.1, w = s.length * 7.6
+    const anchor = side ? (cos > 0 ? 'start' : 'end') : 'middle'
+    // Push the satellite outward until its label doesn't overlap anything already placed.
+    let r = SR, sx = 0, sy = 0, lx = 0, ly = 0
+    for (; r <= SR + 64; r += 8) {
+      sx = nd.x + r * cos; sy = nd.y + r * sin
+      lx = sx + (side ? 9 * Math.sign(cos) : 0); ly = sy + (side ? 5 : sin < 0 ? -11 : 21)
+      const x0 = anchor === 'start' ? lx : anchor === 'end' ? lx - w : lx - w / 2
+      const b: Box = [x0 - 3, ly - 13, x0 + w + 3, ly + 4]
+      if (clear(b) || r + 8 > SR + 64) { placed.push(b, [sx - 4, sy - 4, sx + 4, sy + 4]); break }
+    }
+    return { s, x: f(sx), y: f(sy), lx: f(lx), ly: f(ly), anchor }
+  })
+  // Spoke from the core to the node, trimmed so the drift never shows a gap.
+  const spoke = [CX + nd.ux * 30, CY + nd.uy * 30, nd.x - nd.ux * 16, nd.y - nd.uy * 16].map(f)
+  return { ...nd, x: f(nd.x), y: f(nd.y), sats, spoke, style: `--h:var(--${nd.hue});${drift()}` }
+})
+const stars = Array.from({ length: 70 }, () => ({ x: f(rnd() * W), y: f(rnd() * H), r: f(0.5 + rnd() * 1.2), o: f(0.15 + rnd() * 0.4), t: f(3 + rnd() * 5), d: f(rnd() * 8) }))
+const first = CAPABILITIES[0]!.id
+const pad = (k: number) => String(k).padStart(2, '0')
+---
+<section id="capabilities" class="cap wrap" aria-labelledby="cap-h" data-cons data-pinned={first}>
+  <p class="eyebrow">What I can do for you</p>
+  <h2 id="cap-h">Capabilities, mapped</h2>
+  <p class="intro">Every node is something I’ve shipped. Hover a cluster to see the proof.</p>
+
+  <div class="layout">
+    <div class="map">
+      <svg viewBox={`0 0 ${W} ${H}`} aria-hidden="true" focusable="false">
+        <defs>
+          <filter id="cap-glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="3.5" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <radialGradient id="cap-core">
+            <stop offset="0" stop-color="var(--ink)" stop-opacity=".22" />
+            <stop offset="1" stop-color="var(--ink)" stop-opacity="0" />
+          </radialGradient>
+        </defs>
+        <g class="stars">
+          {stars.map(s => <circle cx={s.x} cy={s.y} r={s.r} style={`--o:${s.o};--t:${s.t}s;--d:-${s.d}s`} />)}
+        </g>
+        <ellipse class="orbit" cx={CX} cy={CY} rx={RX} ry={RY} />
+        {nodes.map(nd => (
+          <g class:list={['cl', nd.id === first && 'on']} data-c={nd.id} style={nd.style}>
+            <line class="edge spoke" x1={nd.spoke[0]} y1={nd.spoke[1]} x2={nd.spoke[2]} y2={nd.spoke[3]} />
+            <g class="drift">
+              {nd.sats.map(s => (
+                <>
+                  <line class="edge" x1={nd.x} y1={nd.y} x2={s.x} y2={s.y} />
+                  <circle class="sat" cx={s.x} cy={s.y} r="3.2" />
+                  <text class="sat-label" x={s.lx} y={s.ly} text-anchor={s.anchor}>{s.s}</text>
+                </>
+              ))}
+              <circle class="pulse" cx={nd.x} cy={nd.y} r="22" />
+              <circle class="halo" cx={nd.x} cy={nd.y} r="22" data-hit={nd.id} />
+              <circle class="node" cx={nd.x} cy={nd.y} r="8" />
+            </g>
+          </g>
+        ))}
+        <g class="core">
+          <circle cx={CX} cy={CY} r="60" fill="url(#cap-core)" />
+          <circle class="core-dot" cx={CX} cy={CY} r="6" />
+          <text x={CX} y={CY + 30} text-anchor="middle">Harsh</text>
+        </g>
+      </svg>
+      <div class="hits">
+        {nodes.map(nd => (
+          <button type="button" class="hit" data-hit={nd.id} aria-pressed={nd.id === first ? 'true' : 'false'} aria-controls="cap-panel"
+            style={`--lx:${f(nd.lx / 10)}%;--ly:${f(nd.ly / 6.4)}%;--nx:${f(nd.x / 10)}%;--ny:${f(nd.y / 6.4)}%;${nd.style}`}>
+            <span aria-hidden="true">{nd.short}</span><span class="vh">{nd.name}</span>
+          </button>
+        ))}
+      </div>
+    </div>
+
+    <div class="panel" id="cap-panel" aria-live="polite">
+      {nodes.map(nd => (
+        <article class="card" data-c={nd.id} hidden={nd.id !== first} style={`--h:var(--${nd.hue})`}>
+          <p class="idx">{pad(nd.i + 1)} / {pad(n)}</p>
+          <h3>{nd.name}</h3>
+          <p class="problem">“{nd.problem}”</p>
+          <ul class="chips" aria-label="Skills">{nd.skills.map(s => <li>{s}</li>)}</ul>
+          <p class="eyebrow">Proof</p>
+          <ul class="proof">
+            {nd.proof.map(p => <li>{p.href ? <a href={p.href}>{p.label}<span aria-hidden="true">→</span></a> : <span class="na">{p.label}</span>}</li>)}
+          </ul>
+        </article>
+      ))}
+    </div>
+  </div>
+  <p class="key">Colour = where the strongest proof lives:
+    <span style="--h:var(--kyndryl)">Kyndryl</span><span style="--h:var(--upl)">UPL</span><span style="--h:var(--oss)">Open source</span><span style="--h:var(--frontier)">Frontier</span>
+  </p>
+</section>
+
+<script>
+  // Hover/focus previews a cluster, click/Enter pins it. Delegated, so it's one set of listeners.
+  const root = document.querySelector<HTMLElement>('[data-cons]')
+  if (root) {
+    let pinned = root.dataset.pinned!
+    const hitOf = (t: EventTarget | null) => (t instanceof Element ? t.closest('[data-hit]')?.getAttribute('data-hit') : null)
+    const show = (id: string) =>
+      root.querySelectorAll<HTMLElement>('[data-c]').forEach(el => {
+        const on = el.dataset.c === id
+        el.tagName === 'ARTICLE' ? (el.hidden = !on) : el.classList.toggle('on', on)
+      })
+    const preview = (e: Event) => { const id = hitOf(e.target); if (id) show(id) }
+    const restore = (e: Event) => {
+      const next = (e as PointerEvent | FocusEvent).relatedTarget
+      if (hitOf(e.target) && !hitOf(next)) show(pinned)
+    }
+    root.addEventListener('pointerover', preview)
+    root.addEventListener('focusin', preview)
+    root.addEventListener('pointerout', restore)
+    root.addEventListener('focusout', restore)
+    root.addEventListener('click', e => {
+      const id = hitOf(e.target)
+      if (!id) return
+      pinned = id
+      root.querySelectorAll('.hit').forEach(b => b.setAttribute('aria-pressed', String(b.getAttribute('data-hit') === id)))
+      show(id)
+    })
+  }
+</script>
+
+<style>
+  .cap { padding-top: 96px; padding-bottom: 96px; }
+  h2 { font: 700 clamp(1.75rem, 3.5vw, 3rem)/1.1 var(--display); margin: 8px 0 0; letter-spacing: -0.02em; }
+  .intro { margin: 12px 0 0; color: var(--ink-2); max-width: 60ch; }
+  .layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(300px, 1fr); gap: 40px; align-items: center; margin-top: 40px; }
+
+  .map {
+    position: relative; aspect-ratio: 1000 / 640; container-type: inline-size;
+    background: radial-gradient(ellipse 60% 55% at 50% 50%, color-mix(in oklch, var(--surface) 90%, transparent), transparent 75%);
+  }
+  svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .stars circle { fill: var(--ink-2); opacity: var(--o); }
+  .orbit { fill: none; stroke: var(--rule); stroke-dasharray: 2 7; opacity: .7; }
+
+  .cl { --c: var(--h); transition: opacity .45s; }
+  .cl:not(.on) { opacity: .6; }
+  .edge { stroke: var(--rule); stroke-width: 1.2; transition: stroke .35s, stroke-width .35s; }
+  .on .edge { stroke: var(--c); stroke-width: 1.6; filter: url(#cap-glow); }
+  .on .spoke { stroke-width: 2; }
+  .sat { fill: var(--ink-2); transition: fill .35s; }
+  .on .sat { fill: var(--c); }
+  .sat-label { fill: var(--ink-2); font: 500 15px var(--body); transition: fill .35s; }
+  .on .sat-label { fill: var(--ink); }
+  .halo { fill: color-mix(in oklch, var(--c) 14%, transparent); stroke: color-mix(in oklch, var(--c) 45%, transparent); cursor: pointer; transition: fill .35s; }
+  .on .halo { fill: color-mix(in oklch, var(--c) 26%, transparent); }
+  .node { fill: var(--c); pointer-events: none; }
+  .on .node { filter: url(#cap-glow); }
+  .pulse { fill: none; stroke: var(--c); opacity: 0; pointer-events: none; transform-box: fill-box; transform-origin: center; }
+  .core text { fill: var(--ink); font: 700 22px var(--display); letter-spacing: -0.01em; }
+  .core-dot { fill: var(--ink); }
+
+  .hits { position: absolute; inset: 0; pointer-events: none; }
+  .hit {
+    position: absolute; left: var(--lx); top: var(--ly); transform: translate(-50%, -50%); pointer-events: auto; white-space: nowrap;
+    min-height: 32px; padding: 4px 12px; border-radius: 999px; cursor: pointer;
+    font: 600 .875rem/1 var(--body); color: var(--ink-2);
+    background: color-mix(in oklch, var(--bg) 82%, transparent); border: 1px solid var(--rule);
+    transition: color .3s, border-color .3s, background .3s;
+  }
+  .hit:hover, .hit:focus-visible, .hit[aria-pressed='true'] { color: var(--ink); border-color: var(--h); }
+  .hit[aria-pressed='true'] { background: color-mix(in oklch, var(--h) 16%, var(--bg)); }
+  .hit:focus-visible { outline: 2px solid var(--h); outline-offset: 3px; border-radius: 999px; }
+  .vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  .panel { min-height: 420px; border-left: 1px solid var(--rule); padding-left: 32px; }
+  .card { --c: var(--h); }
+  .idx { margin: 0; font: 500 .75rem var(--mono); letter-spacing: .08em; color: var(--c); }
+  h3 { font: 700 clamp(1.4rem, 2.2vw, 1.75rem)/1.15 var(--display); margin: 10px 0 0; letter-spacing: -0.015em; }
+  .problem { margin: 16px 0 0; font-size: 1.125rem; line-height: 1.45; color: var(--ink); padding-left: 14px; border-left: 2px solid var(--c); }
+  .chips { list-style: none; display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 20px 0 24px; }
+  .chips li { font: 500 .8125rem/1 var(--mono); padding: 7px 10px; border-radius: 999px; border: 1px solid color-mix(in oklch, var(--c) 40%, var(--rule)); color: var(--ink-2); }
+  .proof { list-style: none; padding: 0; margin: 8px 0 0; }
+  .proof li { border-top: 1px solid var(--rule); }
+  .proof li:last-child { border-bottom: 1px solid var(--rule); }
+  .proof a, .proof .na { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; text-decoration: none; font-size: .9375rem; line-height: 1.4; }
+  .proof a span { color: var(--c); transition: transform .2s; }
+  .proof a:hover { color: var(--c); }
+  .proof a:hover span { transform: translateX(4px); }
+  .proof .na { color: var(--ink-2); }
+
+  .key { margin: 24px 0 0; font: .75rem/1.6 var(--mono); color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  .key span::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--h); margin-right: 6px; }
+
+  @container (max-width: 560px) { .sat-label { display: none; } .core text { font-size: 36px; } }
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; gap: 32px; }
+    .panel { min-height: 0; border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); padding-top: 24px; }
+  }
+  @media (max-width: 720px) {
+    .cap { padding-top: 64px; padding-bottom: 64px; }
+    /* On a phone the pill sits on the node itself and wraps, so neighbours never collide. */
+    .hit { left: var(--nx); top: var(--ny); width: min-content; white-space: normal; text-align: center; font-size: .75rem; line-height: 1.15; padding: 5px 9px; border-radius: 12px; }
+    .hit:focus-visible { border-radius: 12px; }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .drift, .hit { animation: drift var(--t) ease-in-out var(--d) infinite; }
+    .stars circle { animation: twinkle var(--t) ease-in-out var(--d) infinite; }
+    .on .pulse { animation: pulse 2.8s ease-out infinite; }
+    .card:not([hidden]) { animation: card-in .4s cubic-bezier(.2, .7, .2, 1) both; }
+  }
+  @keyframes drift { 50% { translate: var(--dx) var(--dy); } }
+  @keyframes twinkle { 50% { opacity: calc(var(--o) * .25); } }
+  @keyframes pulse { from { opacity: .7; transform: scale(1); } to { opacity: 0; transform: scale(2.1); } }
+  @keyframes card-in { from { opacity: 0; transform: translateY(8px); } }
+</style>

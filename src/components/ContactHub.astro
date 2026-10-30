@@ -1,12 +1,12 @@
 ---
-import { existsSync } from 'node:fs'
 import { profile } from '../data/profile'
 
 interface Props { variant: 'hero' | 'full' | 'bar' }
 const { variant } = Astro.props
 
 // Until a phone-free résumé PDF is dropped into public/, the button points at the HTML résumé.
-const hasPdf = existsSync('public/resume.pdf')
+// Vite resolves the glob from the project root, so this holds whatever directory the build runs from.
+const hasPdf = Object.keys(import.meta.glob('/public/resume.pdf')).length > 0
 const resume = hasPdf
   ? { href: '/resume.pdf', label: `Download résumé · PDF · ${profile.resumeUpdated}`, short: 'Résumé', download: true }
   : { href: '/resume/', label: 'Résumé', short: 'Résumé', download: false }
