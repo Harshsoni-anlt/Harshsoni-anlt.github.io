@@ -9,14 +9,13 @@ export async function GET({ site }: { site: URL }) {
   const body = {
     name: profile.name,
     role: profile.role,
-    employer: profile.employer,
     location: profile.location,
-    summary: profile.about,
+    summary: profile.about.join(' '),
+    next: profile.next,
     url: site.href,
     email: profile.email,
     linkedin: profile.linkedin,
     github: profile.github,
-    availability: profile.availability,
     experience: profile.experience.map(e => ({
       ...e,
       work: work.filter(w => w.data.chapter === e.org.toLowerCase()).map(w => ({
@@ -24,19 +23,17 @@ export async function GET({ site }: { site: URL }) {
       })),
     })),
     education: profile.education,
-    awards: profile.awards,
-    capabilities: profile.capabilities.map(c => ({ name: c.name, detail: c.detail })),
+    awards: profile.awards.map(({ when, title, line }) => ({ when, title, line })),
     projects: quests.map(q => ({
       title: q.data.title,
       status: q.data.status,
       shipped: q.data.shipped?.toISOString().slice(0, 10),
-      summary: q.data.tagline,
+      summary: q.data.line,
       outcome: q.data.resumeLine,
       measured: q.data.xp,
       limitation: q.data.limitation,
       stack: q.data.stack,
       repo: q.data.repo ? `https://github.com/${q.data.repo}` : undefined,
-      page: new URL(`/quests/${q.id}/`, site).href,
     })),
   }
   return new Response(JSON.stringify(body, null, 2), { headers: { 'Content-Type': 'application/json' } })

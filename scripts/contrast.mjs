@@ -26,7 +26,7 @@ const fromOklab = ([L, A, B]) => {
 const mix = (a, b, p) => { const [x, y] = [toOklab(a), toOklab(b)]; return fromOklab(x.map((v, i) => v * p + y[i] * (1 - p))) }
 
 // A parse miss would make every comparison NaN and "pass" silently.
-if (!dark.bg || !dark.ink || !dark['ink-2']) { console.log('FAIL: could not read colour tokens from Base.astro'); process.exit(1) }
+if (!dark.bg || !dark.ink || !dark['ink-2'] || !dark['ink-3']) { console.log('FAIL: could not read colour tokens from Base.astro'); process.exit(1) }
 
 let failed = 0
 const schemes = [['dark', dark]]
@@ -37,15 +37,10 @@ for (const [name, t] of schemes) {
   if (t['surface-2']) surfaces['surface-2'] = C('surface-2')
   for (const [sname, s] of Object.entries(surfaces)) {
     // Every chromatic stop is used as text (gradient text, numerals), so each must pass on its own.
-    for (const fg of ['ink', 'ink-2', 'ok', 'uat', ...['c1', 'c2', 'c3', 'c4', 'c5'].filter(k => t[k])]) {
+    for (const fg of ['ink', 'ink-2', 'ink-3', ...['c1', 'c2', 'c3', 'c4', 'c5'].filter(k => t[k])]) {
       const r = ratio(C(fg), s)
       if (r < 4.5) { failed++; console.log(`FAIL ${name}: ${fg} on ${sname} = ${r.toFixed(2)}`) }
     }
-  }
-  // Primary button: bg-coloured text on ink, and on each chromatic stop when hovered.
-  for (const fg of ['ink', ...['c1', 'c2', 'c3', 'c4', 'c5'].filter(k => t[k])]) {
-    const r = ratio(C('bg'), C(fg))
-    if (r < 4.5) { failed++; console.log(`FAIL ${name}: bg text on ${fg} button = ${r.toFixed(2)}`) }
   }
 }
 console.log(failed ? `${failed} contrast failure(s)` : `contrast: all text pairs ≥ 4.5:1 (${schemes.map(s => s[0]).join(' + ')})`)

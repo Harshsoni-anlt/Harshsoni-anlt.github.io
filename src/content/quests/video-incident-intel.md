@@ -29,6 +29,7 @@ traits:
   cantTell: "n/a answer"
   localGate: "motion filter"
   byod: "your footage"
+line: "Ask camera footage a plain-English question. You write the checks, and every answer cites the frame it came from."
 ---
 
 - A check is a plain-language question plus an answer shape: yes/no, count, one-of, or free text.

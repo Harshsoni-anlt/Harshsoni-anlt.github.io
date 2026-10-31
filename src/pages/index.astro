@@ -1,422 +1,255 @@
 ---
 import { getCollection } from 'astro:content'
 import Base from '../layouts/Base.astro'
-import ContactHub from '../components/ContactHub.astro'
-import StatusPill from '../components/StatusPill.astro'
-import Capabilities from '../components/Capabilities.astro'
-import Terminal from '../components/Terminal.astro'
 import { profile } from '../data/profile'
-import { JOURNEY } from '../data/places'
-import { fmtDate, questCode, sortQuests, sortWork } from '../lib/achievements'
+import { sortQuests } from '../lib/achievements'
 
 const quests = sortQuests(await getCollection('quests'))
-const shipped = quests.filter(q => q.data.status === 'cleared').length
-const work = sortWork(await getCollection('work'))
-const logs = (await getCollection('log')).sort((a, b) => +b.data.date - +a.data.date)
-const latest = logs.find(l => l.data.kind === 'tested')
-const MOD = { text: 'Decisions', video: 'Video', audio: 'Voice', image: 'Vision', data: 'Data + agents' }
 // Resolved from the project root by Vite, so it works whatever directory the build runs from.
-const DEMOS = Object.keys(import.meta.glob('/public/demos/*.mp4'))
-const demo = (id: string) => (DEMOS.includes(`/public/demos/${id}.mp4`) ? `/demos/${id}` : null)
-const kyndryl = work.filter(w => w.data.chapter === 'kyndryl')
-const upl = work.filter(w => w.data.chapter === 'upl')
-const WORDS = ['banks', 'supply chains', 'regulated enterprises', 'your business']
-const longest = WORDS.reduce((a, b) => (b.length > a.length ? b : a))
-const [topAward, ...otherAwards] = profile.awards
-const certified = otherAwards.filter(a => !/Award/.test(a))
-const alsoRecognised = otherAwards.filter(a => /Award/.test(a))
+const POSTERS = Object.keys(import.meta.glob('/public/demos/*.jpg'))
+const poster = (id: string) => (POSTERS.includes(`/public/demos/${id}.jpg`) ? `/demos/${id}.jpg` : null)
+const [nextLabel, ...nextRest] = profile.next.split(': ')
+const SECTIONS = [
+  { id: 'about', label: 'About' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'open-source', label: 'Open source' },
+  { id: 'awards', label: 'Awards & education' },
+]
 ---
-<Base title={`${profile.name} · ${profile.role}`} description={profile.description}>
-  <div id="world-wrap" aria-hidden="true">
-    <div class="world-poster"></div>
-    <canvas id="world"></canvas>
-    <div id="world-labels"></div>
-  </div>
-
-  <!-- ─────────────── Hero ─────────────── -->
-  <section id="hero" class="hero wrap" aria-labelledby="hero-h">
-    <p class="eyebrow" data-hero-in>{profile.role} · {profile.employer} · {profile.location}</p>
-    <h1 id="hero-h"><span data-split>{profile.name}</span></h1>
-    <p class="line" data-hero-in>
-      I make AI work inside
-      <span class="rot-mask"><span class="rot" data-rotate={WORDS.join('|')}>{WORDS[0]}</span><span class="rot-size" aria-hidden="true">{longest}</span></span>
-    </p>
-    <p class="sub" data-hero-in>{profile.subline}</p>
-    <div class="cta" data-hero-in>
-      <ContactHub variant="hero" />
-      <button class="btn wizard" type="button" data-open-terminal data-magnetic>Ask the wizard <kbd>⌘K</kbd></button>
-    </div>
-    <ul class="chips" data-hero-in>
-      <li><span class="dot"></span>UPL OpenAg Awards 2024–25 · Winner</li>
-      <li><span class="dot"></span>In production at a regulated bank</li>
-      <li><span class="dot"></span>Kyndryl at ETCIO Conclave 2026</li>
-      <li><span class="dot"></span>{shipped} systems shipped in public</li>
-    </ul>
-    <a class="cue" href="#journey" aria-label="Scroll to the story"><span></span></a>
-  </section>
-
-  <!-- ─────────────── Journey (pinned; flies the 3D camera) ─────────────── -->
-  <section id="journey" aria-labelledby="journey-h">
-    <div class="jwrap wrap">
-      <h2 id="journey-h" class="eyebrow">The story so far</h2>
-      <ol class="steps">
-        {JOURNEY.map((s, i) => (
-          <li class={`step ${i === 0 ? 'active' : ''} ${s.image ? 'has-img' : ''}`}>
-            {s.image && <img src={s.image.src} alt={s.image.alt} class={s.id} loading="lazy" decoding="async" width="600" height="750" />}
-            <div class="stxt">
-              <span class="when">{String(i + 1).padStart(2, '0')} · {s.when}</span>
-              <h3>{s.title}</h3>
-              {s.sub && <p class="ssub">{s.sub}</p>}
-              <p class="sline">{s.line}</p>
-            </div>
-          </li>
-        ))}
-      </ol>
-      <div class="rail" aria-hidden="true"><i></i></div>
-    </div>
-  </section>
-
-  <Capabilities />
-
-  <!-- ─────────────── Client work ─────────────── -->
-  <section id="work" class="wrap block" aria-labelledby="work-h">
-    <div class="head" data-reveal>
-      <p class="eyebrow">Inside the enterprise</p>
-      <h2 id="work-h">From the RFQ to running on Monday</h2>
-      <p class="intro">Forward deployed means I’m in the room for the scoping, the proposal and the architecture, and still there when it goes to production. Client names stay private; the work doesn’t.</p>
-    </div>
-    <div class="org-block" data-reveal>
-      <div class="org-head"><h3>Kyndryl</h3><span>Lead II, Forward Deployed Engineer · Jan 2026 – present</span></div>
-      <ol class="ent">
-        <li class="ecard ring glow">
-          <div class="etop"><StatusPill status="consulting" /></div>
-          <h4>RFQs, proposals & solution architecture</h4>
-          <p>Partnering with enterprise clients to turn a business problem into a scoped, priced AI architecture, then a PoC that earns the production build.</p>
-        </li>
-        {kyndryl.map(w => (
-          <li class="ecard ring glow">
-            <div class="etop"><StatusPill status={w.data.status} /></div>
-            <h4>{w.data.title}</h4>
-            <p>{w.data.problem ?? w.data.built}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-    <div class="org-block" data-reveal>
-      <div class="org-head"><h3>UPL</h3><span>Data Scientist, Digital & Analytics CoE · 2022 – 2026</span></div>
-      <ol class="ent">
-        {upl.map(w => (
-          <li class="ecard ring glow">
-            {w.data.metric ? (
-              <div class="metric"><span class="big">{w.data.metric}</span><span class="cap">{w.data.metricNote}</span></div>
-            ) : (
-              <div class="etop"><StatusPill status={w.data.status} /></div>
-            )}
-            <h4>{w.data.title}</h4>
-            <p>{w.data.built}</p>
-          </li>
-        ))}
-      </ol>
-    </div>
-  </section>
-
-  <!-- ─────────────── Recognition ─────────────── -->
-  <section id="recognition" class="wrap block" aria-labelledby="rec-h">
-    <div class="rec" data-reveal>
-      <div class="rec-text">
-        <p class="eyebrow">Recognition</p>
-        <h2 id="rec-h">UPL OpenAg Awards 2024–25</h2>
-        <p class="lead">Winner of the Living the Values “Win win win” award for the AI demand-forecasting engine, with a Certificate of Excellence from UPL’s Chairman & Group CEO.</p>
-        <h3 class="eyebrow sm">Also recognised</h3>
-        <ul class="awards">{alsoRecognised.map(a => <li>{a}</li>)}</ul>
-        <h3 class="eyebrow sm">Certified</h3>
-        <ul class="awards">{certified.map(a => <li>{a}</li>)}</ul>
+<Base title={`${profile.name}, Forward Deployed Engineer`} description={profile.description} home>
+  <div class="wrap page">
+    <header class="side">
+      <div>
+        <h1 class="name"><a href="/">{profile.name}</a></h1>
+        <p class="role">{profile.role}<span class="loc"> · {profile.location}</span></p>
+        <p class="intro">{profile.intro}</p>
+        <p class="next"><span>{nextLabel}:</span> {nextRest.join(': ')}</p>
+        <ul class="links" aria-label="Links">
+          <li><a href={profile.resume}>Résumé</a></li>
+          <li><a href={`mailto:${profile.email}`}>Email</a></li>
+          <li><a href={profile.linkedin} target="_blank" rel="noopener">LinkedIn<span class="ext" aria-hidden="true">↗</span></a></li>
+          <li><a href={profile.github} target="_blank" rel="noopener">GitHub<span class="ext" aria-hidden="true">↗</span></a></li>
+        </ul>
+        <nav class="nav" aria-label="Sections">
+          <ul>
+            {SECTIONS.map(s => (
+              <li><a href={`#${s.id}`}><span class="ind" aria-hidden="true"></span><span class="lbl">{s.label}</span></a></li>
+            ))}
+          </ul>
+        </nav>
       </div>
-      <figure class="award ring">
-        <img src="/images/upl-openag-award-2025.jpg" alt="UPL OpenAg Awards 2024–2025 trophy reading “Harsh Soni, Winner” beside a UPL Certificate of Excellence" loading="lazy" decoding="async" width="899" height="1200" />
-        <figcaption>{topAward!.split(':')[0]}</figcaption>
-      </figure>
-    </div>
-  </section>
+    </header>
 
-  <!-- ─────────────── Education ─────────────── -->
-  <section id="education" class="wrap block" aria-labelledby="edu-h">
-    <div class="head" data-reveal>
-      <p class="eyebrow">Education</p>
-      <h2 id="edu-h">Economics first, then econometrics, then AI</h2>
-    </div>
-    <ol class="edu" data-stagger>
-      {profile.education.map(e => (
-        <li class="ring">
-          <span class="when">{e.when}</span>
-          <h3>{e.org}</h3>
-          <p class="deg">{e.title}</p>
-          <p class="note">{e.note}</p>
-        </li>
-      ))}
-    </ol>
-  </section>
+    <main id="content" class="content">
+      <section id="about" aria-label="About">
+        <h2 class="label">About</h2>
+        <div class="prose">{profile.about.map(p => <p>{p}</p>)}</div>
+      </section>
 
-  <!-- ─────────────── Systems ─────────────── -->
-  <section id="systems" class="wrap block" aria-labelledby="sys-h">
-    <div class="head" data-reveal>
-      <p class="eyebrow">Built in public</p>
-      <h2 id="sys-h">Systems I’ve built in public</h2>
-      <p class="intro">Each takes a new AI capability into a real constraint: your data, your footage, your voice, your photos, your decisions. Every card plays its own demo.</p>
-    </div>
-    <ol class="cards" data-stagger>
-      {quests.map(q => {
-        const d = demo(q.id)
-        return (
-          <li class="card" data-demo={d ? '' : undefined}>
-            <a href={`/quests/${q.id}/`} class="ring">
-              <div class="media">
-                {d ? (
-                  <video muted loop playsinline preload="none" poster={`${d}.jpg`} aria-hidden="true"><source src={`${d}.mp4`} type="video/mp4" /></video>
-                ) : (
-                  <div class="nomedia"><span>{q.data.xp[0]!.value}</span><small>{q.data.xp[0]!.label}</small></div>
-                )}
-                <span class="mod">{MOD[q.data.modality]}</span>
-              </div>
+      <section id="experience" aria-label="Experience">
+        <h2 class="label">Experience</h2>
+        <ol class="rows">
+          {profile.experience.map(e => (
+            <li class="row">
+              <p class="when">{e.when}</p>
               <div class="body">
-                <span class="code">{questCode(q)} · {q.data.status === 'cleared' ? fmtDate(q.data.shipped) : 'in progress'}</span>
-                <h3 style={`view-transition-name: q-${q.id}`}>{q.data.title}</h3>
-                <p>{q.data.tagline}</p>
-                <span class="more">Open the case <span aria-hidden="true">→</span></span>
+                <h3><a class="title" href={`${profile.resume}#${e.id}`}>{e.title} · {e.org}<span class="ext" aria-hidden="true">→</span></a></h3>
+                <p class="line">{e.line}</p>
+                <ul class="tags" aria-label="Technologies">{e.tags.map(t => <li>{t}</li>)}</ul>
               </div>
-            </a>
-          </li>
-        )
-      })}
-    </ol>
-  </section>
+            </li>
+          ))}
+        </ol>
+        <a class="more" href={profile.resume}>View full résumé <span aria-hidden="true">→</span></a>
+      </section>
 
-  <!-- ─────────────── Next quest ─────────────── -->
-  <section id="next" class="wrap block" aria-labelledby="next-h">
-    <div class="head" data-reveal>
-      <p class="eyebrow">Next quest</p>
-      <h2 id="next-h">{profile.next.title}</h2>
-      <p class="intro">New models ship every week. I test which ones hold up on real data, so the next deployment starts from evidence, not a demo.</p>
-    </div>
-    <ol class="paths" data-stagger>
-      {profile.next.paths.map((p, i) => (
-        <li class="ring"><span class="n">0{i + 1}</span><h3>{p.name}</h3><p>{p.line}</p></li>
-      ))}
-    </ol>
-    {latest && (
-      <a class="lab ring" href={`/log/#${latest.id}`} data-reveal>
-        <span class="eyebrow">Field log · {fmtDate(latest.data.date)}</span>
-        <strong>{latest.data.title}</strong>
-        <span>{latest.data.result}</span>
-        <span class="more">Read the numbers →</span>
-      </a>
-    )}
-  </section>
+      <section id="open-source" aria-label="Open source">
+        <h2 class="label">Open source</h2>
+        <ol class="rows">
+          {quests.map(q => {
+            const img = poster(q.id)
+            const href = q.data.repo ? `https://github.com/${q.data.repo}` : '/log/#2026-10-30-d1-3b'
+            const external = !!q.data.repo
+            return (
+              <li class="row">
+                {img && <div class="media"><img class="thumb" src={img} alt="" width="960" height="600" loading="lazy" decoding="async" /></div>}
+                <div class="body">
+                  <h3><a class="title" href={href} {...(external ? { target: '_blank', rel: 'noopener' } : {})}>{q.data.title}{q.data.status === 'in-progress' && <span class="wip">in progress</span>}<span class="ext" aria-hidden="true">{external ? '↗' : '→'}</span></a></h3>
+                  <p class="line">{q.data.line}</p>
+                  <ul class="tags" aria-label="Technologies">{q.data.stack.slice(0, 4).map(t => <li>{t}</li>)}</ul>
+                </div>
+              </li>
+            )
+          })}
+        </ol>
+        <a class="more" href={profile.github} target="_blank" rel="noopener">All repositories on GitHub <span aria-hidden="true">↗</span></a>
+      </section>
 
-  <!-- ─────────────── Off the clock ─────────────── -->
-  <section id="off" class="wrap block" aria-labelledby="off-h">
-    <div class="head small-head" data-reveal>
-      <p class="eyebrow">Off the clock</p>
-      <h2 id="off-h">Altruistic. Peace in chaos.</h2>
-    </div>
-    <ul class="off" data-stagger>
-      {profile.offClock.map(o => <li class="ring"><strong>{o.name}</strong><span>{o.line}</span></li>)}
-    </ul>
-  </section>
+      <section id="awards" aria-label="Awards and education">
+        <h2 class="label">Awards & education</h2>
+        <ol class="rows">
+          {profile.awards.map(a => (
+            <li class={`row ${'image' in a ? 'with-img' : ''}`}>
+              {'image' in a && a.image ? (
+                <div class="media">
+                  <p class="when">{a.when}</p>
+                  <a class="photo" href={a.image.src} target="_blank" rel="noopener" aria-label={`Open photo: ${a.title}`}>
+                    <img class="thumb natural" src={'thumb' in a.image ? a.image.thumb : a.image.src} alt={a.image.alt} width={a.image.w} height={a.image.h} loading="lazy" decoding="async" />
+                  </a>
+                </div>
+              ) : <p class="when">{a.when}</p>}
+              <div class="body">
+                <h3 class="plain">{a.title}</h3>
+                <p class="line">{a.line}</p>
+              </div>
+            </li>
+          ))}
+          {profile.education.map(e => (
+            <li class="row">
+              <p class="when">{e.when}</p>
+              <div class="body">
+                <h3 class="plain">{e.org}</h3>
+                <p class="deg">{e.title}</p>
+                {'line' in e && <p class="line">{e.line}</p>}
+              </div>
+            </li>
+          ))}
+        </ol>
+      </section>
 
-  <!-- ─────────────── Contact ─────────────── -->
-  <section id="contact" class="wrap block" aria-labelledby="contact-h">
-    <div class="head" data-reveal>
-      <p class="eyebrow">Contact</p>
-      <h2 id="contact-h">Hiring, or have a process AI should fix?</h2>
-      <p class="intro">Pick the fastest way, or <button type="button" class="link" data-open-terminal>ask the wizard</button> and type <code>hire</code>.</p>
-    </div>
-    <ContactHub variant="full" />
-    <div id="about" class="about" data-reveal>
-      <h3 class="eyebrow">About</h3>
-      <p>{profile.about}</p>
-    </div>
-  </section>
-
-  <Terminal />
+      <footer class="foot">
+        <p>{profile.footer}</p>
+        <p><a class="mail" href={`mailto:${profile.email}`}>{profile.email}</a></p>
+        <ul class="links small" aria-label="Links">
+          <li><a href={profile.resume}>Résumé</a></li>
+          <li><a href={profile.linkedin} target="_blank" rel="noopener">LinkedIn<span class="ext" aria-hidden="true">↗</span></a></li>
+          <li><a href={profile.github} target="_blank" rel="noopener">GitHub<span class="ext" aria-hidden="true">↗</span></a></li>
+        </ul>
+      </footer>
+    </main>
+  </div>
 </Base>
 
 <script>
-  import '../scripts/motion'
+  // Scroll-spy: the nav item for the section in the top 30% of the viewport is active;
+  // at the very bottom the last item wins (a short last section would otherwise never light up).
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('.nav a')]
+  const ids = links.map(a => a.hash.slice(1))
+  const set = (id: string) => links.forEach(a => a.classList.toggle('active', a.hash === `#${id}`))
+  const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && set(e.target.id)), { rootMargin: '0px 0px -70% 0px' })
+  ids.forEach(id => { const el = document.getElementById(id); if (el) io.observe(el) })
+  addEventListener('scroll', () => {
+    if (innerHeight + scrollY >= document.documentElement.scrollHeight - 4) set(ids.at(-1)!)
+  }, { passive: true })
+  set(ids[0]!)
 </script>
 
 <style>
-  /* ---------- 3D world layer (content always sits above it) ---------- */
-  #world-wrap { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-  #world, .world-poster { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .world-poster {
-    background:
-      radial-gradient(46vw 40vw at 80% 30%, color-mix(in oklch, var(--c2) 14%, transparent), transparent 70%),
-      radial-gradient(36vw 30vw at 90% 80%, color-mix(in oklch, var(--c4) 10%, transparent), transparent 70%);
+  /* ── Layout: single column on phones; sticky identity column + scrolling content from 1024px ── */
+  .side { padding-top: 64px; }
+  .content { padding: 48px 0 64px; }
+  @media (min-width: 1024px) {
+    .page { display: flex; justify-content: space-between; gap: 16px; }
+    .side { position: sticky; top: 0; max-height: 100vh; width: 48%; display: flex; flex-direction: column; justify-content: space-between; padding: 96px 0; }
+    .content { width: 52%; padding: 96px 0; }
   }
-  /* A soft scrim on the left keeps text legible over the scene on wide screens. */
-  #world-wrap::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--bg) 0%, color-mix(in oklch, var(--bg) 70%, transparent) 30%, transparent 58%); pointer-events: none; }
-  @media (max-width: 1023px) { #world-wrap::after { background: linear-gradient(180deg, color-mix(in oklch, var(--bg) 62%, transparent) 0%, color-mix(in oklch, var(--bg) 40%, transparent) 55%, color-mix(in oklch, var(--bg) 80%, transparent) 100%); } }
-  #world-labels { position: absolute; inset: 0; overflow: hidden; z-index: 1; }
-  #world-labels :global(.w-label) {
-    position: absolute; left: 0; top: 0; white-space: nowrap; opacity: 0; transition: opacity .35s;
-    font: 500 .75rem/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink);
-    padding: 7px 10px; border-radius: 999px; background: color-mix(in oklch, var(--bg) 78%, transparent); border: 1px solid var(--rule);
-  }
-  #world-labels :global(.w-label.travel) { color: var(--ink-2); }
-  #world-labels :global(.w-label.on) { color: var(--bg); background: var(--ink); border-color: var(--ink); }
-  :global(main) > :is(section, .pin-spacer) { position: relative; z-index: 1; }
+  /* Short laptop screens (1366×768 leaves ~657px): tighten so the column still fits; un-stick only below that. */
+  @media (min-width: 1024px) and (max-height: 700px) { .side { padding: 48px 0; } .nav { margin-top: 32px; } }
+  @media (min-width: 1024px) and (max-height: 560px) { .side { position: static; max-height: none; } }
 
-  /* ---------- hero ---------- */
-  .hero { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding-top: 96px; padding-bottom: 96px; }
-  h1 { font: 700 clamp(3.75rem, 13vw, 11.5rem)/.88 var(--display); letter-spacing: -0.06em; margin: 20px 0 28px; }
-  h1 > span { display: inline-block; padding-bottom: .04em; background: linear-gradient(100deg, #FFFFFF 0%, #FFFFFF 46%, var(--c2) 72%, var(--c3) 86%, var(--c4) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .line { font: 600 clamp(1.5rem, 3vw, 2.5rem)/1.15 var(--display); letter-spacing: -0.03em; margin: 0 0 18px; }
-  .rot-mask { display: inline-grid; vertical-align: bottom; overflow: hidden; padding-bottom: .1em; margin-left: .26em; }
-  .rot-mask > * { grid-area: 1 / 1; white-space: nowrap; }
-  .rot { background: var(--chroma); -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .rot-size { visibility: hidden; }
-  @media (max-width: 720px) { .rot-mask { display: grid; margin-left: 0; } }
-  .sub { color: var(--ink-2); font-size: clamp(1rem, 1.3vw, 1.1875rem); max-width: 52ch; margin: 0 0 32px; }
-  .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
-  .wizard { background: color-mix(in oklch, var(--surface) 80%, transparent); }
-  kbd { font: 500 .75rem var(--mono); padding: 3px 7px; border: 1px solid var(--rule); border-radius: 6px; background: var(--bg); color: var(--ink-2); }
-  @media (hover: none) { kbd { display: none; } }
-  .chips { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; padding: 0; margin: 36px 0 0; }
-  .chips li { display: inline-flex; align-items: center; gap: 9px; font: 500 .8125rem var(--mono); padding: 9px 14px; border-radius: 999px; border: 1px solid var(--rule); background: color-mix(in oklch, var(--bg) 82%, transparent); }
-  .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--chroma); }
-  .cue { position: absolute; bottom: 30px; left: 50%; translate: -50% 0; width: 24px; height: 40px; border: 1px solid var(--ink-2); border-radius: 14px; }
-  .cue span { position: absolute; left: 50%; top: 8px; width: 2px; height: 8px; margin-left: -1px; border-radius: 2px; background: var(--ink); animation: cue 1.8s ease-in-out infinite; }
-  @keyframes cue { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(14px); opacity: 0; } 100% { opacity: 0; } }
-  @media (max-width: 1023px) { .cue { display: none; } }
-  @media (prefers-reduced-motion: reduce) { .cue span { animation: none; } }
-
-  /* ---------- journey ---------- */
-  .jwrap { padding-top: 120px; padding-bottom: 96px; }
-  .steps { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 20px; max-width: 580px; }
-  .step { display: grid; gap: 20px; padding: 26px; border-radius: 22px; background: color-mix(in oklch, var(--surface) 94%, transparent); border: 1px solid var(--rule); box-shadow: 0 30px 80px -40px #000; }
-  .step.has-img { grid-template-columns: 150px 1fr; align-items: start; }
-  .step img { width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 50% 70%; border-radius: 14px; display: block; border: 1px solid var(--rule); background: var(--surface-2); }
-  .step img.goa { object-fit: cover; object-position: 78% 55%; }
-  .when { font: 500 .75rem var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--ink-2); }
-  .step h3 { font: 700 clamp(1.5rem, 2.8vw, 2.125rem)/1.08 var(--display); margin: 10px 0 8px; letter-spacing: -0.035em; }
-  .step .ssub { font: 500 .8125rem/1.45 var(--mono); color: var(--ink); margin: 0 0 12px; }
-  .step .sline { margin: 0; color: var(--ink-2); font-size: 1rem; }
-  .rail { display: none; }
-  :global(.world-on) #journey .jwrap { height: 100svh; padding-top: 0; padding-bottom: 0; display: flex; flex-direction: column; justify-content: center; position: relative; }
-  :global(.world-on) .steps { position: relative; height: 330px; display: block; }
-  :global(.world-on) .step { position: absolute; inset: 0 auto auto 0; width: 100%; min-height: 250px; opacity: 0; transform: translateY(14px); transition: opacity .16s, transform .16s; pointer-events: none; }
-  :global(.world-on) .step.active { opacity: 1; transform: none; pointer-events: auto; transition: opacity .45s .14s, transform .6s .14s cubic-bezier(.2,.7,.2,1); }
-  :global(.world-on) .rail { display: block; position: absolute; left: 32px; right: 32px; bottom: 48px; height: 1px; background: var(--rule); }
-  :global(.world-on) .rail i { display: block; height: 100%; background: var(--chroma); transform-origin: left; transform: scaleX(var(--jp, 0)); }
-  @media (max-width: 1023px) {
-    :global(.world-on) #journey .jwrap { justify-content: flex-end; padding-bottom: 100px; }
-    :global(.world-on) .rail { left: 16px; right: 16px; bottom: 76px; }
-  }
-  @media (max-width: 720px) {
-    :global(.world-on) .steps { height: 290px; }
-    :global(.world-on) .step { min-height: 0; }
-    .step { padding: 18px; border-radius: 18px; gap: 14px; }
-    .step.has-img { grid-template-columns: 88px 1fr; }
-    .step h3 { font-size: 1.375rem; }
-    .step .sline { font-size: .9375rem; }
+  /* ── Identity ── */
+  .name { font: 600 clamp(2.5rem, 5vw, 3.25rem)/1.05 var(--sans); letter-spacing: -0.035em; }
+  .name a { color: var(--ink); }
+  .role { margin-top: 12px; color: var(--ink); font-size: 1.125rem; font-weight: 500; letter-spacing: -0.01em; text-wrap: balance; }
+  .intro { margin-top: 16px; max-width: 340px; }
+  .next { margin-top: 16px; max-width: 340px; font-size: .9375rem; }
+  .next span { color: var(--ink); font-weight: 500; }
+  .links { list-style: none; margin: 28px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 22px; }
+  .links a { display: inline-flex; align-items: center; min-height: 44px; color: var(--ink); font-weight: 500; text-decoration: underline; text-decoration-color: transparent; text-underline-offset: 5px; transition: text-decoration-color .2s var(--ease); }
+  .ext { display: inline-block; margin-left: 3px; font-size: .85em; transition: transform .15s var(--ease); }
+  @media (hover: hover) {
+    .links a:hover { text-decoration-color: var(--ink-3); }
+    .links a:hover .ext { transform: translate(2px, -2px); }
   }
 
-  /* ---------- shared blocks ---------- */
-  .block { padding-top: 140px; padding-bottom: 20px; }
-  .head { max-width: 780px; margin-bottom: 44px; }
-  .head h2 { font: 700 clamp(2.25rem, 5.2vw, 4rem)/1.03 var(--display); letter-spacing: -0.045em; margin: 14px 0 16px; }
-  .small-head h2 { font-size: clamp(1.75rem, 3.6vw, 2.75rem); }
-  .intro { color: var(--ink-2); font-size: 1.125rem; margin: 0; }
-  code { font: .9em var(--mono); padding: 1px 6px; border-radius: 6px; background: var(--surface); }
-  .link { all: unset; cursor: pointer; color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--c2); }
-  .link:focus-visible { outline: 2px solid var(--c1); outline-offset: 3px; border-radius: 4px; }
-  .eyebrow.sm { margin: 26px 0 8px; }
-
-  /* ---------- client work ---------- */
-  .org-block { margin-bottom: 56px; }
-  .org-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; flex-wrap: wrap; padding-bottom: 14px; border-bottom: 1px solid var(--rule); margin-bottom: 18px; }
-  .org-head h3 { font: 700 1.75rem/1 var(--display); letter-spacing: -0.03em; margin: 0; }
-  .org-head span { font: .8125rem var(--mono); color: var(--ink-2); }
-  .ent { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-  .ecard { padding: 28px; border-radius: 22px; border: 1px solid var(--rule); background: linear-gradient(180deg, var(--surface-2), var(--surface)); }
-  .etop { margin-bottom: 18px; }
-  .ecard h4 { font: 650 1.3125rem/1.2 var(--display); letter-spacing: -0.02em; margin: 0 0 8px; }
-  .ecard p { margin: 0; color: var(--ink-2); font-size: .9375rem; }
-  .metric { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
-  .big { font: 700 2.75rem/1 var(--display); letter-spacing: -0.045em; color: var(--ink); }
-  .cap { font: 500 .8125rem/1.4 var(--mono); color: var(--ink-2); }
-
-  /* ---------- recognition ---------- */
-  .rec { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 56px; align-items: center; }
-  .award { margin: 0; border-radius: 26px; overflow: hidden; border: 1px solid var(--rule); background: var(--surface); box-shadow: 0 40px 120px -50px color-mix(in oklch, var(--c3) 55%, transparent); }
-  .award img { width: 100%; height: auto; display: block; aspect-ratio: 4 / 4.4; object-fit: cover; object-position: 50% 78%; filter: brightness(1.08) contrast(1.04); }
-  .award figcaption { padding: 14px 18px; font: 500 .75rem var(--mono); color: var(--ink-2); letter-spacing: .04em; border-top: 1px solid var(--rule); }
-  .rec-text h2 { font: 700 clamp(2.25rem, 5vw, 3.75rem)/1.03 var(--display); letter-spacing: -0.045em; margin: 14px 0 18px; }
-  .lead { font-size: 1.1875rem; color: var(--ink); margin: 0; }
-  .awards { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--rule); }
-  .awards li { padding: 12px 0; border-bottom: 1px solid var(--rule); color: var(--ink-2); font-size: .9375rem; }
-  @media (max-width: 860px) { .rec { grid-template-columns: 1fr; gap: 28px; } .award img { aspect-ratio: 4 / 3.4; } }
-
-  /* ---------- education ---------- */
-  .edu { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 16px; }
-  .edu li { padding: 32px; border-radius: 22px; border: 1px solid var(--rule); background: linear-gradient(180deg, var(--surface-2), var(--surface)); }
-  .edu h3 { font: 700 clamp(1.5rem, 2.6vw, 2rem)/1.1 var(--display); letter-spacing: -0.035em; margin: 12px 0 10px; }
-  .deg { font: 500 .9375rem/1.45 var(--mono); margin: 0 0 12px; }
-  .edu .note { color: var(--ink-2); margin: 0; }
-
-  /* ---------- systems: demo cards (3 + 2 layout, no orphans) ---------- */
-  .cards { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
-  .card { grid-column: span 2; }
-  .card:nth-child(4), .card:nth-child(5) { grid-column: span 3; }
-  .card a { display: flex; flex-direction: column; height: 100%; border-radius: 22px; overflow: hidden; background: var(--surface); border: 1px solid var(--rule); text-decoration: none; transition: transform .4s cubic-bezier(.2,.7,.2,1); }
-  @media (hover: hover) { .card a:hover { transform: translateY(-6px); } }
-  .card a:focus-visible { transform: translateY(-6px); }
-  .media { position: relative; aspect-ratio: 16 / 10; background: #000; overflow: hidden; box-shadow: inset 0 -1px 0 var(--rule); }
-  .media video { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .6s; }
-  @media (hover: hover) { .card a:hover video { transform: scale(1.03); } }
-  .nomedia { height: 100%; display: grid; place-content: center; gap: 8px; text-align: center; padding: 24px; background: linear-gradient(180deg, var(--surface-2), var(--bg)); }
-  .nomedia span { font: 700 3.5rem/1 var(--display); letter-spacing: -0.05em; color: var(--ink); }
-  .nomedia small { color: var(--ink-2); font: .8125rem/1.4 var(--mono); max-width: 34ch; }
-  .mod { position: absolute; left: 12px; top: 12px; font: 500 .75rem var(--mono); letter-spacing: .08em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; background: color-mix(in oklch, var(--bg) 82%, transparent); border: 1px solid var(--rule); }
-  .body { padding: 22px 24px 24px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
-  .code { font: .75rem var(--mono); color: var(--ink-2); letter-spacing: .06em; }
-  .body h3 { font: 650 1.5rem/1.12 var(--display); margin: 0; letter-spacing: -0.03em; }
-  .body p { margin: 0; color: var(--ink-2); font-size: .9875rem; }
-  .more { margin-top: auto; padding-top: 12px; font: 500 .875rem var(--body); color: var(--ink); }
-
-  /* ---------- next quest ---------- */
-  .paths { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-  .paths li { padding: 28px; border-radius: 22px; border: 1px solid var(--rule); background: linear-gradient(180deg, var(--surface-2), var(--surface)); }
-  .n { font: 500 .8125rem var(--mono); color: var(--ink-2); }
-  .paths h3 { font: 650 1.3125rem/1.18 var(--display); letter-spacing: -0.02em; margin: 14px 0 8px; }
-  .paths p { margin: 0; color: var(--ink-2); font-size: .9375rem; }
-  .lab { display: grid; gap: 6px; margin-top: 16px; padding: 26px 28px; border-radius: 22px; border: 1px solid var(--rule); background: var(--surface); text-decoration: none; }
-  .lab strong { font: 650 1.375rem/1.2 var(--display); }
-  .lab span:not(.eyebrow):not(.more) { color: var(--ink-2); }
-
-  /* ---------- off the clock ---------- */
-  .off { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-  .off li { padding: 24px; border-radius: 22px; border: 1px solid var(--rule); background: var(--surface); display: flex; flex-direction: column; gap: 6px; }
-  .off strong { font: 650 1.125rem var(--display); }
-  .off span { color: var(--ink-2); font-size: .9375rem; }
-
-  /* ---------- contact ---------- */
-  #contact { padding-bottom: 110px; }
-  .about { margin-top: 56px; max-width: 72ch; }
-  .about p { font-size: 1.0625rem; color: var(--ink-2); }
-
-  @media (max-width: 1023px) {
-    .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .card, .card:nth-child(4), .card:nth-child(5) { grid-column: span 1; }
-    .card:last-child { grid-column: span 2; }
-    .paths { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* ── Section nav (desktop only) ── */
+  .nav { display: none; }
+  @media (min-width: 1024px) {
+    .nav { display: block; margin-top: 64px; }
+    .nav ul { list-style: none; margin: 0; padding: 0; width: max-content; }
+    .nav a { display: flex; align-items: center; gap: 16px; padding: 12px 0; }
+    .ind { width: 32px; height: 1px; background: var(--ink-3); transition: width .15s var(--ease), background .15s var(--ease); }
+    .lbl { font: 500 .75rem/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3); transition: color .15s var(--ease); }
+    .nav a.active .ind { width: 64px; background: var(--chroma); }
+    .nav a.active .lbl { color: var(--ink); }
   }
-  @media (max-width: 720px) {
-    .block { padding-top: 100px; }
-    .ent, .cards, .paths, .off { grid-template-columns: 1fr; }
-    .card:last-child { grid-column: auto; }
-    .hero { padding-top: 76px; }
-    .ecard, .edu li { padding: 22px; }
+  @media (min-width: 1024px) and (hover: hover) {
+    .nav a:hover .ind { width: 64px; background: var(--ink); }
+    .nav a:hover .lbl { color: var(--ink); }
   }
+
+  /* ── Sections ── */
+  section { margin-bottom: 64px; scroll-margin-top: 96px; }
+  @media (min-width: 768px) { section { margin-bottom: 96px; } }
+  @media (min-width: 1024px) { section { margin-bottom: 144px; scroll-margin-top: 96px; } }
+  /* Section labels: a sticky blurred bar on phones; hidden on desktop, where the nav names them. */
+  .label { position: sticky; top: 0; z-index: 20; margin: 0 -24px 16px; padding: 18px 24px; font: 500 .75rem/1 var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--ink); background: color-mix(in oklch, var(--bg) 78%, transparent); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+  @media (min-width: 768px) { .label { margin: 0 -48px 16px; padding: 18px 48px; } }
+  @media (min-width: 1024px) { .label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } }
+  .prose p + p { margin-top: 16px; }
+
+  /* ── Rows: date gutter + body; whole row clickable; hovering one dims the others ── */
+  .rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 48px; }
+  .row { position: relative; isolation: isolate; display: grid; gap: 8px; transition: opacity .15s var(--ease); }
+  @media (min-width: 640px) { .row { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 16px; } .row > .when, .row > .media { grid-column: 1 / span 2; } .row > .body { grid-column: 3 / -1; } }
+  .row::before { content: ''; position: absolute; inset: -16px -24px; z-index: -1; border-radius: 10px; transition: background .15s var(--ease), box-shadow .15s var(--ease); }
+  @media (min-width: 1024px) and (hover: hover) {
+    .rows:has(> .row:hover .title) > .row:not(:hover) { opacity: .5; }
+    .row::after { content: ''; position: absolute; inset: -24px 0; z-index: -2; }
+    .row:has(.title):hover::before { background: color-mix(in oklch, var(--surface-2) 70%, transparent); box-shadow: inset 0 1px 0 rgb(255 255 255 / .05); }
+    .row:hover .title { color: var(--c1); }
+    .row:hover .title .ext { transform: translate(2px, -2px); }
+  }
+  .when { font: 500 .75rem/1.6 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); padding-top: 3px; text-wrap: balance; }
+  .body h3 { font-size: 1rem; line-height: 1.4; font-weight: 500; }
+  .title { color: var(--ink); transition: color .15s var(--ease); }
+  /* The title link covers the whole row. */
+  .title::after { content: ''; position: absolute; inset: -16px -24px; z-index: 1; border-radius: 10px; }
+  .wip { margin-left: 8px; font: 500 .6875rem/1 var(--mono); letter-spacing: .04em; text-transform: uppercase; color: var(--ink-3); padding: 3px 8px; border: 1px solid var(--rule); border-radius: 999px; vertical-align: 2px; }
+  .line { margin-top: 8px; font-size: .9375rem; line-height: 1.6; }
+  .deg { margin-top: 4px; color: var(--ink); font-size: .9375rem; }
+  .tags { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .tags li { font: 500 .75rem/1 var(--sans); color: var(--ink-2); padding: 6px 11px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--rule); }
+
+  /* Thumbnails: small, quiet, never cropped awkwardly; photos keep their natural ratio. */
+  .media { order: 2; max-width: 200px; }
+  @media (min-width: 640px) { .media { order: 0; max-width: none; padding-top: 4px; } .with-img .media { padding-top: 0; } .with-img .photo { display: block; margin-top: 8px; } }
+  /* Phones: the award date stays first, the photo goes last, like every other row. */
+  @media (max-width: 639px) { .with-img > .media { display: contents; } .with-img > .media > .when { order: -1; } .with-img .photo { order: 2; display: block; max-width: 200px; } }
+  .thumb { display: block; width: 100%; height: auto; object-fit: cover; border-radius: 6px; border: 1px solid var(--rule); transition: border-color .15s var(--ease); }
+  .thumb:not(.natural) { aspect-ratio: 16 / 10; }
+  .photo { position: relative; z-index: 2; }
+  @media (hover: hover) { .row:hover .thumb, .photo:hover .thumb { border-color: color-mix(in oklch, var(--ink) 25%, transparent); } }
+
+  .more { display: inline-flex; align-items: center; gap: 6px; margin-top: 40px; min-height: 44px; color: var(--ink); font-weight: 500; }
+  .more span { transition: transform .15s var(--ease); }
+  @media (hover: hover) { .more:hover span { transform: translateX(4px); } .more:hover { color: var(--c1); } }
+
+  /* ── Footer ── */
+  .foot { padding-top: 32px; border-top: 1px solid var(--rule); font-size: .875rem; color: var(--ink-3); }
+  .foot p + p { margin-top: 4px; }
+  .mail { color: var(--ink); display: inline-flex; align-items: center; min-height: 44px; }
+  .links.small { margin-top: 4px; }
+  .links.small a { font-size: .875rem; }
+
+  /* ── One quiet entrance, CSS only; content is in the HTML regardless ── */
+  @media (prefers-reduced-motion: no-preference) {
+    .side > div > *, .content { animation: rise .6s var(--ease) backwards; }
+    .side > div > :nth-child(2) { animation-delay: .05s; }
+    .side > div > :nth-child(3) { animation-delay: .1s; }
+    .side > div > :nth-child(4) { animation-delay: .15s; }
+    .side > div > :nth-child(5) { animation-delay: .2s; }
+    .side > div > :nth-child(6), .content { animation-delay: .25s; }
+  }
+  @keyframes rise { from { opacity: 0; transform: translateY(8px); } }
 </style>

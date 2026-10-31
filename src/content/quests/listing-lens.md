@@ -29,6 +29,7 @@ traits:
   cantTell: "visible_in_photo flag"
   localGate: "sharpness ≥ 200"
   byod: "your fields"
+line: "Photo in, marketplace listing out, in English and Hindi. Each field says whether the photo actually confirms it."
 ---
 
 - A `visible_in_photo` flag on every field stopped the model inventing capacity and waterproofing: on every real photo tested, those came back unconfirmed.

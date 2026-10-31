@@ -29,6 +29,7 @@ traits:
   cantTell: "not heard"
   localGate: "noise gate"
   byod: "your form"
+line: "Speak a field note in Hindi or Hinglish and get a structured record, with each value linked to the audio it came from."
 ---
 
 - Your form becomes the response schema at request time, so you decide the fields.

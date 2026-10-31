@@ -26,6 +26,7 @@ featured: false
 traits:
   measure: "29 routing regression tests"
   byod: "your CSVs"
+line: "A multi-agent warehouse assistant that answers from your own CSVs, with 19 MCP tools and stock figures read from SQL."
 ---
 
 - A LangGraph planner routes each question to one of six agents: inventory, equipment, operations, safety, forecasting, documents.

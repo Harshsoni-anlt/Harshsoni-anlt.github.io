@@ -1,146 +1,72 @@
 ---
-import ContactHub from '../components/ContactHub.astro'
 import { profile } from '../data/profile'
 
-interface Props { title: string; description: string; print?: boolean }
-const { title, description, print = false } = Astro.props
+interface Props { title: string; description: string; home?: boolean }
+const { title, description, home = false } = Astro.props
 const canonical = new URL(Astro.url.pathname, Astro.site)
 ---
 <!doctype html>
 <html lang="en-IN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{title}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonical} />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <link rel="alternate" type="application/json" href="/profile.json" title="Profile (JSON)" />
   <meta property="og:title" content={title} />
   <meta property="og:description" content={description} />
   <meta property="og:url" content={canonical} />
-  <meta name="theme-color" content="#07080B" />
+  <meta property="og:type" content="profile" />
+  <meta property="og:image" content={new URL('/og.jpg', Astro.site)} />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="627" />
+  <meta property="og:image:alt" content={`${profile.name}, ${profile.role}`} />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#09090B" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
 </head>
-<body class={print ? 'print' : undefined}>
-  <a class="skip" href="#main">Skip to content</a>
-  <div class="progress" aria-hidden="true"><i></i></div>
-  <ContactHub variant="bar" />
-  <main id="main"><slot /></main>
-  <footer class="foot">
-    <p class="foot-links">
-      <a href={profile.linkedin}>LinkedIn</a><a href={profile.github}>GitHub</a><a href="/resume/">Résumé</a>
-      <a href="/log/">Field log</a><a href="/profile.json">profile.json</a><a href="/llms.txt">llms.txt</a>
-    </p>
-    <p class="dim">Built with Astro. No trackers, no cookies.</p>
-  </footer>
-  <script is:inline>
-    // Copy-email buttons (hidden without JS) and the pointer glow on rows. Nothing else runs.
-    document.querySelectorAll('[data-copy]').forEach(b => {
-      b.hidden = false
-      b.addEventListener('click', async () => {
-        try { await navigator.clipboard.writeText(b.dataset.copy); b.nextElementSibling.textContent = 'Copied' } catch { b.nextElementSibling.textContent = 'Copy failed' }
-        setTimeout(() => (b.nextElementSibling.textContent = ''), 2000)
-      })
-    })
-    if (matchMedia('(pointer: fine)').matches) {
-      document.addEventListener('pointermove', e => {
-        const el = e.target.closest && e.target.closest('.glow')
-        if (!el) return
-        const r = el.getBoundingClientRect()
-        el.style.setProperty('--x', `${e.clientX - r.left}px`)
-        el.style.setProperty('--y', `${e.clientY - r.top}px`)
-      }, { passive: true })
-    }
-  </script>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  {!home && (
+    <header class="sub wrap">
+      <a href="/" class="back"><span aria-hidden="true">←</span> {profile.name}</a>
+    </header>
+  )}
+  <slot />
 </body>
 </html>
 
 <style is:global>
-  /* One neutral base + one chromatic gradient. Colour is a finish, not a palette. */
+  /* One neutral ramp and one tiny chromatic accent. Values are checked by scripts/contrast.mjs. */
   :root {
-    --bg: #07080B; --surface: #0E1016; --surface-2: #141721; --ink: #F4F5F8; --ink-2: #A2A7B6; --rule: #1E2230;
-    --c1: #7DF9FF; --c2: #7C9CFF; --c3: #B98CFF; --c4: #FF86C8; --c5: #FFC48A;
-    --chroma: linear-gradient(100deg, var(--c1), var(--c2) 28%, var(--c3) 52%, var(--c4) 76%, var(--c5));
-    --spectrum: var(--chroma);
-    /* Older names, kept so components written against them still resolve. */
-    --kyndryl: var(--c1); --upl: var(--c5); --oss: var(--c3); --frontier: var(--c4);
-    --ok: #6EE7A8; --uat: #8FB4FF; --accent: var(--c3); --band: 0%;
-    --display: 'Geist', -apple-system, 'Segoe UI', system-ui, sans-serif;
-    --body: 'Geist', -apple-system, 'Segoe UI', system-ui, sans-serif;
+    --bg: #09090B; --surface: #111114; --surface-2: #17171B;
+    --ink: #EDEDEF; --ink-2: #A1A1AA; --ink-3: #8E8E98; --rule: #222228;
+    --c1: #8AB4FF; --c2: #B79CFF; --c3: #F09AC8;
+    --chroma: linear-gradient(90deg, var(--c1), var(--c2), var(--c3));
+    --sans: 'Geist', -apple-system, 'Segoe UI', system-ui, sans-serif;
     --mono: 'Geist Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --ease: cubic-bezier(.4, 0, .2, 1);
     color-scheme: dark;
   }
-
   * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 72px; background: var(--bg); }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 1.0625rem/1.6 var(--body); -webkit-font-smoothing: antialiased; }
-  @media (max-width: 1023px) { body { padding-bottom: calc(56px + env(safe-area-inset-bottom)); } }
-  ::selection { background: color-mix(in oklch, var(--c3) 45%, transparent); }
-  a { color: inherit; text-underline-offset: 3px; text-decoration-color: color-mix(in oklch, var(--c2) 70%, transparent); }
-  :focus-visible { outline: 2px solid var(--c1); outline-offset: 3px; border-radius: 6px; }
-  h1, h2, h3 { font-family: var(--display); }
-  .eyebrow { font: 500 .75rem/1.4 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--ink-2); margin: 0; }
-  .chroma-text { background: var(--chroma); background-size: 200% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .wrap { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
-  @media (max-width: 720px) { .wrap { padding: 0 16px; } }
+  html { background: var(--bg); scrollbar-gutter: stable; -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--bg); color: var(--ink-2); font: 400 1rem/1.625 var(--sans); -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+  ::selection { background: color-mix(in oklch, var(--c2) 35%, transparent); color: var(--ink); }
+  a { color: inherit; text-decoration: none; }
+  h1, h2, h3, p { margin: 0; }
+  h1, h2, h3 { color: var(--ink); font-weight: 500; text-wrap: balance; }
+  :focus-visible { outline: 2px solid var(--c1); outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+  @media (min-width: 768px) { .wrap { padding: 0 48px; } }
   .skip { position: absolute; left: -999px; top: 8px; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 8px; z-index: 50; }
   .skip:focus { left: 8px; }
-
-  /* Hairline chromatic border on hover: a gradient ring drawn with a mask, no layout shift. */
-  .ring { position: relative; }
-  .ring::after {
-    content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
-    background: var(--chroma); opacity: 0; transition: opacity .35s;
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude;
-  }
-  .ring:focus-within::after { opacity: 1; }
-  @media (hover: hover) { .ring:hover::after { opacity: 1; } }
-
-  .btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px; padding: 0 22px;
-    border-radius: 999px; border: 1px solid var(--rule); color: var(--ink); background: var(--surface);
-    font: 500 .9375rem/1 var(--body); text-decoration: none; cursor: pointer; transition: background .2s, border-color .2s, color .2s;
-  }
-  .btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
-  @media (hover: hover) {
-    .btn:hover { border-color: color-mix(in oklch, var(--ink) 35%, transparent); }
-    .btn.primary:hover { background: var(--chroma); border-color: transparent; color: #07080B; }
-  }
-  .btn.sm { min-height: 34px; padding: 0 14px; font-size: .8125rem; }
-
-  .glow { position: relative; isolation: isolate; }
-  .glow::before {
-    content: ''; position: absolute; inset: 0; z-index: -1; border-radius: inherit; opacity: 0; transition: opacity .3s; pointer-events: none;
-    background: radial-gradient(360px circle at var(--x, 50%) var(--y, 50%), color-mix(in oklch, var(--c2) 14%, transparent), transparent 70%);
-  }
-  @media (hover: hover) { .glow:hover::before { opacity: 1; } }
-
-  .progress { position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 30; pointer-events: none; display: none; }
-  .progress i { display: block; height: 100%; background: var(--chroma); transform-origin: left; transform: scaleX(0); }
-  @supports (animation-timeline: scroll()) {
-    @media (prefers-reduced-motion: no-preference) {
-      .progress { display: block; }
-      .progress i { animation: grow linear both; animation-timeline: scroll(root); }
-    }
-  }
-  @keyframes grow { to { transform: scaleX(1); } }
-
-  .foot { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 48px 32px 56px; border-top: 1px solid var(--rule); color: var(--ink-2); font: .8125rem/1.6 var(--mono); }
-  .foot p { margin: 0 0 8px; }
-  .foot-links { display: flex; flex-wrap: wrap; gap: 0 22px; }
-  .foot-links a { display: inline-flex; align-items: center; min-height: 44px; }
-  @media (max-width: 720px) { .foot { padding: 32px 16px; } }
-  .dim { opacity: .8; }
-
-  @view-transition { navigation: auto; }
-  ::view-transition-group(*) { animation-duration: 280ms; animation-timing-function: cubic-bezier(.2, .7, .2, 1); }
-  @media (prefers-reduced-motion: reduce) { @view-transition { navigation: none; } }
-
-  @media print {
-    .bar, .progress, .foot, .skip { display: none !important; }
-    html, body { background: #fff; color: #000; padding: 0; }
-  }
+  .sub { padding-top: 48px; }
+  .back { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--ink); font-weight: 500; }
+  .back span { transition: transform .2s var(--ease); }
+  @media (hover: hover) { .back:hover span { transform: translateX(-4px); } }
+  @media print { .sub, .skip { display: none !important; } html, body { background: #fff; color: #111; } }
 </style>

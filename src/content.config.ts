@@ -25,6 +25,7 @@ const quests = defineCollection({
     quest: z.string(),
     modality: z.enum(['text', 'video', 'audio', 'image', 'data']),
     headline: z.string(), // the one measured line shown in the index row
+    line: z.string(), // the one line shown on the home page
     xp: z.array(z.object({ value: z.string(), label: z.string() })).min(1), // measured results only
     limitation: z.string().optional(),
     boss: z.object({ name: z.string(), story: z.string() }).optional(),
@@ -47,7 +48,7 @@ const work = defineCollection({
     order: z.number(),
     chapter: z.enum(['kyndryl', 'upl']),
     title: z.string(),
-    status: z.enum(['production', 'uat', 'contributing', 'shipped']),
+    status: z.enum(['production', 'uat', 'contributing', 'shipped']).optional(), // unset until Harsh confirms it
     size: z.enum(['lead', 'short', 'ledger']),
     metric: z.string().optional(), // big numeral in the UPL ledger
     metricNote: z.string().optional(),

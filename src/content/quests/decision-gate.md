@@ -14,7 +14,7 @@ xp:
     label: per message on a laptop (M1 Pro), no text generated
 stack: [Liquid d1-3B, transformers, Gemini Flash-Lite, Python]
 tags: [decision-models]
-resumeLine: In progress. A 3B decision model kept 68% of 300 bank-support messages local at 96% accuracy; with escalation it matched cloud-only accuracy using a third of the cloud calls.
+resumeLine: A 3B decision model kept 68% of 300 bank-support messages local at 96% accuracy; with escalation it matched cloud-only accuracy using a third of the cloud calls.
 headline: "A local 3B model keeps 68% of calls on the laptop. Full write-up in the field log."
 featured: false
 limitation: "One 300-message dataset; re-test on messier data pending."
@@ -22,6 +22,7 @@ traits:
   measure: "300-msg run"
   cantTell: "abstain < 0.8"
   localGate: "local model first"
+line: "A local 3B model makes the confident calls and sends only the hard ones to a cloud LLM. It kept 68% of messages local."
 ---
 
 - Measurement first, product second. 300 real bank-support messages, each needing a fraud flag and one of seven teams.

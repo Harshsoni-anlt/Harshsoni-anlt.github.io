@@ -1,88 +1,101 @@
-// Sourced from Harsh's résumé (Oct 2026), GitHub profile README and LinkedIn.
-// Nothing on the site that isn't true on paper. No client names, no phone number.
+// Every fact here traces to 00_plan/PORTFOLIO_EVIDENCE.md. No client names, no phone number.
+// Copy agreed in the v5 war room (00_plan/references/WAR_ROOM.md).
 export const profile = {
   name: 'Harsh Soni',
-  role: 'Forward Deployed Engineer',
-  employer: 'Kyndryl',
+  role: 'Forward Deployed Engineer at Kyndryl',
   location: 'Bengaluru',
-  eyebrow: 'Harsh Soni · Forward Deployed Engineer · Kyndryl · Bengaluru',
-  headline: { before: 'I make AI work inside real businesses, and ', em: 'measure it', after: ' before I promise it.' },
-  subline: 'From the RFQ to production at Kyndryl: document AI now runs at a regulated bank. Before that, UPL, where my forecasting across 23,000+ SKUs in 9 regions added USD 3M in sales and won the UPL OpenAg Awards 2024–25. 5+ years in data and AI.',
+  intro: 'I build AI systems for real businesses and take them from proof of concept to production.',
+  next: 'Next: FDE, AI engineer or AI architect, building with frontier AI.',
   description:
-    'Forward Deployed Engineer at Kyndryl. Document AI in production at a regulated bank, demand forecasting across 9 regions at UPL, and open-source systems that measure each new AI capability before trusting it.',
-  about:
-    "Forward Deployed Engineer at Kyndryl: I'm in the room for the RFQ, the proposal and the architecture, and still on the hook when it runs in production, as it now does at a regulated bank. Before that I spent four years as a data scientist at UPL, building demand forecasting for 23,000+ SKUs across 9 regions that won the UPL OpenAg Awards 2024–25, then bringing GenAI into regulatory work. I trained in economics (B.Com (Hons.), University of Kota) and analytics (Master of Analytics, Tata Institute of Social Sciences (TISS), Mumbai), so I start every AI problem with the business question. Outside work I build in public, measuring each new AI capability against a real constraint before I trust it.",
-
-  // Harsh: résumé email is harshsoni.hsw@gmail.com, GitHub profile has harshsoni.skha@gmail.com. Pending his choice.
-  email: 'harshsoni.skha@gmail.com',
+    'Forward Deployed Engineer at Kyndryl. I build AI systems for real businesses and take them from proof of concept to production.',
+  email: 'harshsoni.hsw@gmail.com',
   github: 'https://github.com/Harshsoni-anlt',
   linkedin: 'https://www.linkedin.com/in/harsh--soni/',
-  cal: { intro: '', scoping: '' }, // Cal.com links once created; empty = Book falls back to email
-  availability: { text: 'Open to FDE roles and select projects', asOf: 'Oct 2026' },
-  resumeUpdated: 'Oct 2026',
+  resume: '/resume/',
+
+  about: [
+    'I love working in technology. I build, ship and architect AI systems, with over five years in data and AI since my Master of Analytics at the Tata Institute of Social Sciences (TISS), Mumbai.',
+    'At Kyndryl I take on RFQs, proposals and client consulting, design the AI architecture and ship it. At UPL, as a data scientist for four years, I won a UPL OpenAg Award for my demand-forecasting work.',
+    'I also contribute to open source. This year I’ve shipped four AI systems in public, with a fifth in progress.',
+  ],
 
   experience: [
-    { org: 'Kyndryl', title: 'Lead II, Forward Deployed Engineer', when: 'Jan 2026 – present', what: 'Client-facing AI delivery: RFQs, proposals and solution architecture, then PoC to production. Document intelligence in production at a regulated bank, GenAI triage, a multi-agent platform, GPU serving with vLLM.' },
-    { org: 'UPL', title: 'Data Scientist, Digital & Analytics CoE', when: 'Jan 2022 – Jan 2026', what: 'Forecasting 23,000+ SKUs across 9 regions with 30+ models; GenAI regulatory dossiers, Text-to-SQL, churn modelling, MLOps. Technical lead; mentored a team of 3.' },
-    { org: 'Hindustan Petroleum Corporation Limited (HPCL)', title: 'Data Science Intern', when: 'Jun – Aug 2021', what: 'Semantic search over employee surveys in R (88% accuracy) and a Shiny dashboard HR used to form teams. Became my Master’s dissertation.' },
-    { org: 'HCL Foundation', title: 'Data Analytics Intern', when: 'Dec 2020 – Feb 2021', what: 'Measured COVID-19’s social, economic and psychological impact on Uday programme beneficiaries; dashboards and recommendations.' },
+    {
+      when: '2026 — Now',
+      title: 'Forward Deployed Engineer (Lead II)',
+      id: 'kyndryl',
+      org: 'Kyndryl',
+      url: 'https://www.kyndryl.com',
+      line: 'My account-opening automation for a regulated bank runs in production, and a GenAI triage layer for credit-card service requests is in UAT. I also work on Kyndryl’s internal multi-agent platform: orchestration, task planning and pluggable tools.',
+      tags: ['AWS Textract', 'AWS Bedrock', 'Agentic AI', 'vLLM'],
+    },
+    {
+      when: '2022 — 2026',
+      title: 'Data Scientist, Digital & Analytics CoE',
+      id: 'upl',
+      org: 'UPL',
+      url: 'https://www.upl-ltd.com',
+      line: 'I built demand forecasting for 23,000+ SKUs in 9 global regions; it raised forecast accuracy 30–35% and added USD 3M in sales. Then GenAI tools for regulatory dossiers and text-to-SQL. As technical lead, I mentored three data scientists and interns.',
+      tags: ['Azure Databricks', 'MLflow', 'Azure OpenAI', 'LangChain'],
+    },
+    {
+      when: 'Jun — Aug 2021',
+      title: 'Data Science Intern',
+      id: 'hpcl',
+      org: 'Hindustan Petroleum Corporation Limited (HPCL)',
+      url: 'https://www.hindustanpetroleum.com',
+      line: 'I built an NLP model with semantic search in R, 88% accurate, and a Shiny dashboard HR managers used to explore survey themes. I later extended it into my TISS dissertation.',
+      tags: ['R', 'NLP', 'Semantic search', 'Shiny'],
+    },
+    {
+      when: 'Dec 2020 — Feb 2021',
+      title: 'Data Analytics Intern',
+      id: 'hcl',
+      org: 'HCL Foundation',
+      url: 'https://www.hclfoundation.org',
+      line: 'I analysed COVID-19’s social, economic and psychological impact on beneficiaries of the Uday programme, and built the dashboard and recommendations from it.',
+      tags: ['Survey analytics', 'Dashboards'],
+    },
   ],
-  education: [
-    { org: 'Tata Institute of Social Sciences (TISS), Mumbai', title: 'Master of Analytics, Financial Econometrics', when: '2020 – 2022', note: 'Dissertation: NLP-based HR survey analytics system, extended from the HPCL internship.' },
-    { org: 'University of Kota', title: 'B.Com (Hons.), Economic Administration & Financial Management', when: '2017 – 2020', note: 'Economics, finance and the business side every model has to answer to.' },
-  ],
+
   awards: [
-    'UPL OpenAg Awards 2024–25 · Living the Values: “Win win win” award, winner, with a Certificate of Excellence, for the AI demand-forecasting engine',
-    'Databricks GenAI Innovation Award 2025, as part of the UPL team',
-    'Forward Deployed Engineer – Foundation, Kyndryl (Aug 2026)',
-    'DeepLearning.AI TensorFlow Developer Specialization',
-    'RS & GIS Applications, ISRO – Indian Institute of Remote Sensing (2020)',
-  ],
-  proof: [
-    { value: 'USD 3M', label: 'incremental sales from demand forecasting' },
-    { value: '+30–35%', label: 'forecast accuracy' },
-    { value: '23–24K', label: 'SKUs forecast across 9 regions' },
-    { value: 'In production', label: "a regulated bank's account-opening pipeline" },
-  ],
-
-  capabilities: [
-    { name: 'Agentic AI & orchestration', detail: 'LangGraph, CrewAI, MCP, multi-agent platforms' },
-    { name: 'Document intelligence', detail: 'OCR (Textract), multilingual extraction, RAG, Azure AI Search' },
-    { name: 'Model evaluation & training data', detail: 'eval-set design, rubric-based judging of model outputs, calibration and failure analysis', href: '/log/#2026-10-30-d1-3b' },
-    { name: 'Local & cost-aware AI', detail: 'vLLM, quantization, small-model routing, NVIDIA GPU inference' },
-    { name: 'Forecasting & classical ML', detail: 'time-series ensembles, churn, MLflow, Databricks' },
-    { name: 'Delivery', detail: 'FastAPI, React, Docker, Kubernetes, AWS, Azure, Power BI' },
-  ],
-
-  // The next quest: where this is all heading.
-  next: {
-    title: 'A future-ready AI engineer and leader',
-    paths: [
-      { name: 'Build my own AI product', line: 'Turn one of these systems into something people pay for.' },
-      { name: 'Forward deployed at a frontier lab', line: 'Put the newest models to work inside the hardest real deployments.' },
-      { name: 'Independent AI consultant', line: 'Walk into a business, find the process AI should fix, ship it.' },
-      { name: 'AI architect & leader', line: 'Lead teams and platforms that make AI routine across an enterprise.' },
-    ],
-  },
-
-  // A few things off the clock. Kept short on purpose.
-  offClock: [
-    { name: 'Road trips', line: 'Kerala, Wayanad, Ooty, Kodaikanal, Braj. Bucket list: everywhere.' },
-    { name: 'Runner', line: 'Early starts, race days.' },
-    { name: 'Would volunteer for', line: 'Humanitarian relief and economic empowerment, the same ground my first data project covered at HCL Foundation.' },
+    {
+      when: '2024 — 25',
+      title: 'UPL OpenAg Awards · Winner',
+      line: 'The “Win win win” award in the Living the Values Awards, for my AI demand-forecasting project, with a Certificate of Excellence signed by UPL’s Chairman & Group CEO.',
+      image: { src: '/images/upl-openag-award-2025.jpg', thumb: '/images/upl-openag-award-2025-crop.jpg', w: 899, h: 700, alt: 'UPL OpenAg Awards 2024–2025 trophy reading “Harsh Soni, Winner” beside a UPL Certificate of Excellence' },
+    },
+    {
+      when: '2025',
+      title: 'Databricks GenAI Innovation Award',
+      line: 'I was part of the UPL team that received it.',
+    },
+    {
+      when: 'May 2026',
+      title: 'Kyndryl at the ETCIO Annual Conclave 2026',
+      line: 'I represented Kyndryl at the company’s booth, 21–24 May, Grand Hyatt Goa.',
+      image: { src: '/images/etcio-conclave-2026.jpg', w: 1000, h: 1000, alt: 'Kyndryl and ETCIO card: Meet me at Kyndryl Booth, Harsh Soni, Forward Deployed Engineer, ETCIO Annual Conclave 2026, Goa' },
+    },
+    {
+      when: 'Aug 2026',
+      title: 'Forward Deployed Engineer – Foundation, Kyndryl',
+      line: 'Also: TensorFlow Developer Specialization (DeepLearning.AI); RS & GIS Applications (ISRO – Indian Institute of Remote Sensing).',
+    },
   ],
 
-  method: [
-    { key: 'measure', label: 'Risk measured first' },
-    { key: 'cantTell', label: 'Honest “can’t tell”' },
-    { key: 'localGate', label: 'Free local gate before API spend' },
-    { key: 'byod', label: 'Bring your own data' },
+  education: [
+    {
+      when: '2020 — 2022',
+      title: 'Master of Analytics, Financial Econometrics',
+      org: 'Tata Institute of Social Sciences (TISS), Mumbai',
+      line: 'Dissertation: an NLP system for HR survey analytics, extended from my HPCL internship.',
+    },
+    {
+      when: '2017 — 2020',
+      title: 'B.Com (Hons.), Economic Administration & Financial Management',
+      org: 'University of Kota',
+    },
   ],
-} as const
 
-export const CHAPTERS = {
-  kyndryl: { n: '01', name: 'Kyndryl', when: '2026 –' },
-  upl: { n: '02', name: 'UPL', when: '2022 – 26' },
-  oss: { n: '03', name: 'Systems I’ve shipped', when: 'open source' },
-  frontier: { n: '04', name: 'Frontier field log', when: 'testing now' },
+  footer: 'Harsh Soni, Bengaluru. Off the clock: running, and road trips from Kerala to Braj.',
 } as const
